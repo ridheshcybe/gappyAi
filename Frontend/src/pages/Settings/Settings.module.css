@@ -1,0 +1,476 @@
+.container {
+  max-width: 72rem;
+  margin: 0 auto;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
+}
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: 3fr 9fr;
+  }
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  position: sticky;
+  top: 88px;
+  align-self: start;
+}
+.tabButton {
+  width: 100%;
+  text-align: left;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  font-weight: 500;
+  border-left: 2px solid transparent;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  color: var(--on-surface-variant);
+  font-family: var(--font-body);
+  font-size: 14px;
+}
+.tabButton:hover {
+  background-color: rgba(52, 52, 60, 0.5);
+}
+.tabButton.active {
+  background-color: var(--surface-variant);
+  color: var(--on-surface);
+  border-left-color: var(--primary);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding-bottom: var(--spacing-xl);
+}
+.tabPanel {
+  animation: fadeIn 0.3s ease-out;
+}
+.tabHeader {
+  margin-bottom: var(--spacing-lg);
+}
+.tabHeader h3 {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 4px;
+}
+.tabHeader p {
+  color: var(--on-surface-variant);
+  font-size: 14px;
+}
+
+.card {
+  background-color: var(--surface-container);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(68, 70, 83, 0.3);
+  padding: var(--spacing-lg);
+  position: relative;
+  overflow: hidden;
+}
+.cardDecor {
+  position: absolute;
+  top: -6rem;
+  right: -6rem;
+  width: 12rem;
+  height: 12rem;
+  background-color: rgba(185, 195, 255, 0.05);
+  border-radius: 50%;
+  filter: blur(48px);
+  pointer-events: none;
+  transition: background-color 0.5s;
+}
+.card:hover .cardDecor {
+  background-color: rgba(185, 195, 255, 0.1);
+}
+.cardContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  position: relative;
+  z-index: 10;
+}
+.cardLeft {
+  max-width: 70%;
+}
+.cardLeft h4 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 4px;
+}
+.cardLeft p {
+  color: var(--on-surface-variant);
+  font-size: 14px;
+}
+.iconPrimary {
+  color: var(--primary);
+  font-size: 20px;
+}
+.cardFooter {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid rgba(68, 70, 83, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.statusDot {
+  display: flex;
+  width: 8px;
+  height: 8px;
+  position: relative;
+}
+.statusPing {
+  position: absolute;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 50%;
+  background-color: #34d399;
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  opacity: 0.75;
+}
+.statusStatic {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  border-radius: 50%;
+  background-color: #10b981;
+}
+.statusText {
+  font-family: var(--font-code);
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+.checkboxItem {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(68, 70, 83, 0.2);
+  background-color: var(--surface);
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.checkboxItem:hover {
+  background-color: rgba(52, 52, 60, 0.3);
+}
+.checkboxItem input[type="checkbox"] {
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--outline-variant);
+  border-radius: var(--radius-default);
+  background-color: var(--surface-dim);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color 0.2s, border-color 0.2s;
+  position: relative;
+}
+.checkboxItem input:checked {
+  background-color: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+}
+.checkboxItem input:checked::after {
+  content: '✓';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  font-weight: 600;
+}
+.checkboxItem div {
+  margin-left: 12px;
+  display: flex;
+  flex-direction: column;
+}
+.checkboxItem div span:first-child {
+  color: var(--on-surface);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.checkboxItem:hover div span:first-child {
+  color: var(--primary);
+}
+.checkboxItem div span:last-child {
+  color: var(--on-surface-variant);
+  font-size: 12px;
+}
+
+.themeGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+.themeOption {
+  cursor: pointer;
+  position: relative;
+}
+.themeOption input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.themeOption > div {
+  border: 2px solid rgba(68, 70, 83, 0.3);
+  border-radius: var(--radius-lg);
+  background-color: var(--surface);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.themeOption input:checked + div {
+  border-color: var(--btn-primary-bg);
+  background-color: rgba(52, 52, 60, 0.3);
+}
+.themeOption:hover > div {
+  border-color: var(--outline-variant);
+}
+.themeOption.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.themeOption.disabled > div {
+  filter: grayscale(1);
+}
+.themePreviewDark {
+  width: 100%;
+  height: 80px;
+  border-radius: var(--radius-lg);
+  background-color: var(--background);
+  border: 1px solid rgba(68, 70, 83, 0.5);
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 8px;
+}
+.themePreviewDark::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: var(--surface-variant);
+}
+.themePreviewDark::after {
+  content: '';
+  width: 64px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: rgba(52, 52, 60, 0.8);
+  margin-left: 8px;
+  margin-top: 4px;
+}
+.themePreviewLight {
+  width: 100%;
+  height: 80px;
+  border-radius: var(--radius-lg);
+  background-color: #ffffff;
+  border: 1px solid #d1d5db;
+  display: flex;
+  align-items: flex-start;
+  padding: 8px;
+}
+.themePreviewLight::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #e5e7eb;
+}
+.themePreviewLight::after {
+  content: '';
+  width: 64px;
+  height: 8px;
+  border-radius: 4px;
+  background-color: #d1d5db;
+  margin-left: 8px;
+  margin-top: 4px;
+}
+.themeOption > div > div:last-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.themeDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--btn-primary-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.themeDot::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--btn-primary-bg);
+}
+.themeDotDisabled {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--outline-variant);
+  display: inline-block;
+}
+.themeOption span:last-child {
+  color: var(--on-surface);
+  font-weight: 500;
+}
+
+.saveRow {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: var(--spacing-md);
+}
+
+/* Integrations tab */
+.integrationGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-md);
+}
+@media (min-width: 768px) {
+  .integrationGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.integrationCard {
+  background-color: var(--surface-container);
+  border-radius: var(--radius-xl);
+  border: 1px solid rgba(68, 70, 83, 0.3);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  transition: border-color 0.2s;
+}
+.integrationCard:hover {
+  border-color: rgba(68, 70, 83, 0.6);
+}
+.integrationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+.integrationIcon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+  background-color: var(--surface);
+  border: 1px solid rgba(68, 70, 83, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 24px;
+  color: var(--on-surface);
+}
+.integrationIcon .material-symbols-outlined {
+  font-size: 28px;
+}
+.connectedBadge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #34d399;
+  background-color: rgba(52, 211, 153, 0.1);
+  padding: 4px 8px;
+  border-radius: var(--radius-default);
+  font-size: 12px;
+  font-weight: 500;
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+.integrationCard h4 {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 4px;
+}
+.integrationCard p {
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  margin-bottom: 16px;
+  flex: 1;
+}
+.integrationFooter {
+  border-top: 1px solid rgba(68, 70, 83, 0.2);
+  padding-top: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.integrationFooter span {
+  font-family: var(--font-code);
+  font-size: 12px;
+  color: var(--on-surface-variant);
+}
+.configureBtn {
+  background: none;
+  border: none;
+  color: var(--error);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.configureBtn:hover {
+  color: rgba(255, 180, 171, 0.8);
+}
+.connectBtn {
+  background: transparent;
+  border: 1px solid rgba(68, 70, 83, 0.5);
+  color: var(--primary);
+  padding: 6px 16px;
+  border-radius: var(--radius-default);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+.connectBtn:hover {
+  background-color: rgba(185, 195, 255, 0.1);
+}
+.manageBtn {
+  background: none;
+  border: none;
+  color: var(--on-surface);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.manageBtn:hover {
+  color: var(--primary);
+}

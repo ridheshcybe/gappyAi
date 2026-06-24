@@ -1,0 +1,112 @@
+/* ===== Design Tokens ===== */
+:root {
+  /* Colors (same as before) */
+  --on-secondary-fixed: #1a1a2e;
+  --surface-container: #1e1f26;
+  --secondary-container: #47475d;
+  --primary: #b9c3ff;
+  --primary-fixed-dim: #b9c3ff;
+  --on-surface: #e3e1eb;
+  --inverse-surface: #e3e1eb;
+  --on-primary-container: #001e78;
+  --background: #121319;
+  --tertiary-fixed-dim: #c4c7ca;
+  --error-container: #93000a;
+  --on-error: #690005;
+  --tertiary: #c4c7ca;
+  --surface-variant: #34343c;
+  --inverse-primary: #3c55bf;
+  --surface: #121319;
+  --on-secondary-container: #b8b6d0;
+  --on-surface-variant: #c5c5d5;
+  --primary-fixed: #dde1ff;
+  --inverse-on-surface: #2f3037;
+  --outline: #8f909e;
+  --surface-dim: #121319;
+  --on-error-container: #ffdad6;
+  --surface-bright: #383940;
+  --on-tertiary-container: #272a2d;
+  --on-primary: #002388;
+  --surface-tint: #b9c3ff;
+  --outline-variant: #444653;
+  --secondary-fixed-dim: #c6c4df;
+  --surface-container-highest: #34343c;
+  --tertiary-container: #8e9194;
+  --error: #ffb4ab;
+  --on-primary-fixed-variant: #1f3ba6;
+  --on-tertiary: #2d3133;
+  --secondary: #c6c4df;
+  --surface-container-lowest: #0d0e14;
+  --on-primary-fixed: #001356;
+  --on-secondary-fixed-variant: #45455b;
+  --tertiary-fixed: #e0e3e6;
+  --on-tertiary-fixed: #191c1e;
+  --primary-container: #7189f6;
+  --on-secondary: #2f2e43;
+  --secondary-fixed: #e2e0fc;
+  --surface-container-high: #292931;
+  --surface-container-low: #1a1b22;
+  --on-tertiary-fixed-variant: #44474a;
+  --on-background: #e3e1eb;
+  --btn-primary-bg: #667eea;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 16px;
+  --spacing-lg: 24px;
+  --spacing-xl: 32px;
+  --sidebar-width: 260px;
+  --header-height: 64px;
+
+  /* Border radius */
+  --radius-default: 0.125rem;
+  --radius-lg: 0.25rem;
+  --radius-xl: 0.5rem;
+  --radius-full: 0.75rem;
+
+  /* Fonts */
+  --font-body: 'Inter', sans-serif;
+  --font-headline: 'Inter', sans-serif;
+  --font-label: 'Geist', sans-serif;
+  --font-code: 'JetBrains Mono', monospace;
+}
+
+/* Base reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  background-color: var(--background);
+  color: var(--on-background);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* Material Symbols base */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+.icon-fill {
+  font-variation-settings: 'FILL' 1;
+}
+
+/* ===== Keyframes ===== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

@@ -1,0 +1,72 @@
+.footer {
+  background-color: #1a1a2e;
+  color: #9ca3af;
+  padding: 64px 0;
+}
+.container {
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  margin-bottom: 48px;
+}
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+.brandCol h4 {
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.brandCol p {
+  font-size: 14px;
+}
+.grid h4 {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.grid ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.grid ul li a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.2s;
+}
+.grid ul li a:hover {
+  color: #fff;
+}
+
+.bottom {
+  border-top: 1px solid #2d2d3f;
+  padding-top: 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  font-size: 14px;
+}
+@media (min-width: 768px) {
+  .bottom {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+.social {
+  display: flex;
+  gap: 16px;
+}

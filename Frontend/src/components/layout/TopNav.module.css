@@ -1,0 +1,134 @@
+.header {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: var(--header-height);
+  z-index: 50;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 var(--spacing-lg);
+  background-color: var(--background);
+  border-bottom: 1px solid var(--outline-variant);
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+.menuBtn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+.menuBtn:hover {
+  color: var(--primary);
+  background-color: var(--surface-variant);
+}
+.logo {
+  font-family: var(--font-headline);
+  font-size: 20px;
+  line-height: 28px;
+  font-weight: 700;
+  color: var(--primary);
+  text-decoration: none;
+}
+.nav {
+  display: none;
+}
+@media (min-width: 768px) {
+  .nav {
+    display: flex;
+    align-items: center;
+    margin-left: var(--spacing-xl);
+    gap: var(--spacing-sm);
+  }
+  .menuBtn {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .menuBtn {
+    display: flex;
+    align-items: center;
+  }
+  .nav {
+    display: none;
+  }
+}
+.navLink {
+  padding: 8px 16px;
+  border-radius: var(--radius-lg);
+  color: var(--on-surface-variant);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.navLink:hover {
+  color: var(--primary);
+}
+.navLink.active {
+  color: var(--primary);
+  font-weight: 700;
+  border-bottom: 2px solid var(--primary);
+  padding-bottom: 6px;
+}
+
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+.search {
+  position: relative;
+  display: none;
+}
+@media (min-width: 640px) {
+  .search {
+    display: block;
+  }
+}
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--on-surface-variant);
+  font-size: 20px;
+}
+.searchInput {
+  padding: 8px 16px 8px 36px;
+  border-radius: var(--radius-lg);
+  background-color: var(--surface-variant);
+  border: 1px solid var(--outline-variant);
+  color: var(--on-surface);
+  font-size: 14px;
+  line-height: 20px;
+  width: 256px;
+  transition: border-color 0.2s;
+}
+.searchInput:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 1px var(--primary);
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  color: var(--on-surface-variant);
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+.iconBtn:hover {
+  color: var(--primary);
+  background-color: var(--surface-variant);
+}

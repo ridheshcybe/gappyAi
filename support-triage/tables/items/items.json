@@ -1,0 +1,15 @@
+{
+  // Folder name must equal "name". Import validates the match.
+  "name": "items",
+  "primary_key_column": "id",   // an auto UUID "id" is added; never declare id/created_at/updated_at/user_id
+  "enable_rls": false,           // true = per-user private rows (default); false = shared team data
+  "visibility": "POD",          // one of: PERSONAL | POD | PUBLIC | RESTRICTED
+  "columns": [
+    { "name": "title", "type": "TEXT", "required": true, "max_length": 240 },
+    { "name": "status", "type": "ENUM", "required": true, "default": "open",
+      "options": ["open", "in_progress", "done"] }
+    // types: BOOLEAN DATE DATETIME ENUM FILE_PATH FLOAT INTEGER JSON SERIAL TEXT USER UUID VECTOR
+    // foreign key: { "name": "owner_id", "type": "UUID", "foreign_key": { "references": "people.id" } }
+  ],
+  "config": {}
+}
