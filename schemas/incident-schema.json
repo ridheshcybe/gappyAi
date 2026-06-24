@@ -1,0 +1,37 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "IncidentSchema",
+  "type": "object",
+  "properties": {
+    "incidentId": { "type": "string" },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "classification": {
+      "type": "object",
+      "properties": {
+        "severity": { "type": "string", "enum": ["P0_CRITICAL", "P1_HIGH", "P2_MEDIUM", "P3_LOW"] },
+        "affectedComponent": { "type": "string" },
+        "errorCategory": { "type": "string" }
+      },
+      "required": ["severity", "affectedComponent", "errorCategory"]
+    },
+    "triageAnalysis": {
+      "type": "object",
+      "properties": {
+        "headline": { "type": "string" },
+        "rootCauseInferred": { "type": "string" },
+        "userImpactDescription": { "type": "string" }
+      },
+      "required": ["headline", "rootCauseInferred", "userImpactDescription"]
+    },
+    "remediationRunbook": {
+      "type": "object",
+      "properties": {
+        "status": { "type": "string", "default": "PENDING_TRIAGE" },
+        "suggestedSteps": { "type": "array", "items": { "type": "string" } },
+        "draftedNotification": { "type": "string" }
+      },
+      "required": ["status", "suggestedSteps", "draftedNotification"]
+    }
+  },
+  "required": ["incidentId", "timestamp", "classification", "triageAnalysis", "remediationRunbook"]
+}

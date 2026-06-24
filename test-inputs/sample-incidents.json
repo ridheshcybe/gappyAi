@@ -1,0 +1,24 @@
+{
+  "incidents": [
+    {
+      "id": "input-1",
+      "source": "email",
+      "raw": "URGENT: Our payment gateway is throwing 502 errors. Customers can't checkout. We're losing ~$500/min. Stack trace: TypeError at line 487 in gateway-service.js. Database connection timeouts detected."
+    },
+    {
+      "id": "input-2",
+      "source": "discord",
+      "raw": "hey team, the auth service is down again. got like 50 login errors in the past 10 mins. users are mad. what do we do?"
+    },
+    {
+      "id": "input-3",
+      "source": "log",
+      "raw": "[2026-06-24 12:45:30] ERROR: Database pool exhausted. Max connections exceeded. Current load: 2,847 active queries. Avg response time: 8.3s (threshold: 0.5s)."
+    },
+    {
+      "id": "input-4",
+      "source": "slack",
+      "raw": "The frontend dashboard is loading slowly today. Not broken, just sluggish. Takes like 5-6s instead of 1-2s. Probably a CDN issue?"
+    }
+  ]
+}
