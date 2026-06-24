@@ -1,14 +1,13 @@
-const { Lemma } = require('@lemma-ai/sdk');
-require('dotenv').config();
+import { LemmaClient } from "lemma-sdk";
 
-// Initialize Lemma environment
-const lemma = new Lemma({
-  apiKey: process.env.LEMMA_API_KEY,
-  environment: 'local' // Use local for dev, 'cloud' for production
+const client = new LemmaClient({
+podId: '019ef9af-d95d-7610-9b82-fe5bf003ef7f'
 });
 
+await client.initialize();
+
 // Initialize Datastore for storing structured incidents
-const incidentStore = lemma.datastore('incidents', {
+const incidentStore = client.datastore('incidents', {
   schema: require('../schemas/incident-schema.json')
 });
 

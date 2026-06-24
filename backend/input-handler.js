@@ -11,7 +11,7 @@ async function ingestAlert(rawInput) {
 
   try {
     // 1. Create a raw alert document in Lemma's document store
-    const alertId = `alert_\${Date.now()}_\${Math.random().toString(36).substr(2, 9)}`;
+    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     
     const rawAlert = {
       id: alertId,
