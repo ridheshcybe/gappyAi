@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { createServer } from "http";
-
 import { initLemma } from './lemma-config.js';
 dotenv.config();
 
@@ -13,16 +12,25 @@ import { initializeSocket, emitIncident } from "./socket.js";
 import escalationService from "./services/escalation-service.js";
 import { prometheusWebhook } from './api/webhooks.js';
 
-const app = express();
-const httpServer = createServer(app);
-const io = initializeSocket(httpServer);
-app.set('io', io);
 
+const app = express();
 // Start escalation service
 escalationService.start();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin:(origin,cb)=>{
+    if(!origin || allowedOrigin.indexOf(origin) !== -1){
+      cb(null,true);
+    }else{
+      cb(new Error("Not allowed by cors"))
+    }
+  }
+}));
+app.use(express.urlencoded({extended:true}))
+const httpServer = createServer(app);
+const io = initializeSocket(httpServer);const allowedOrigin=['http://localhost:5173',`*.onrender.com`]
+app.set('io', io);
 
 // POST /api/ingest
 app.post(
