@@ -1,4 +1,5 @@
-import lemma from '../lemma-config.js';
+// backend/agents/notification-agent.js
+import { lemmaClient } from '../lemma-config.js';
 
 const PROMPT_TEMPLATE = `
 Format an incident notification for {channel}.
@@ -27,14 +28,6 @@ Return STRICT JSON:
 `;
 
 class NotificationAgent {
-  constructor() {
-    this.agent = lemma.agent({
-      model: 'gpt-4o-mini',
-      temperature: 0.4,
-      system: 'You format incident notifications. Always valid JSON.'
-    });
-  }
-
   async format(incident, rootCause, runbook, channel = 'slack') {
     const prompt = PROMPT_TEMPLATE
       .replaceAll('{channel}', channel)
@@ -44,8 +37,16 @@ class NotificationAgent {
       .replace('{service}', incident.service || 'unknown')
       .replace('{runbookSummary}', runbook?.summary || 'N/A');
 
-    const response = await this.agent.complete(prompt);
-    return this.safeParse(response, channel);
+    // Use lemmaClient for the completion
+    const response = await lemmaClient.agents.chat({
+      agentId: 'notification_formatter_agent',
+      message: prompt,
+      system: 'You format incident notifications. Always valid JSON.',
+      model: 'gpt-4o-mini',
+      temperature: 0.4,
+    });
+
+    return this.safeParse(response.content, channel);
   }
 
   safeParse(text, channel) {

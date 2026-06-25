@@ -1,5 +1,5 @@
 // backend/agents/postmortem-agent.js
-import Lemma from '../lemma-config.js';
+import { lemmaClient } from '../lemma-config.js';
 import copilotContext from '../services/copilot-context.js';
 
 const SYSTEM = `You generate professional incident post-mortems (RCAs).
@@ -24,20 +24,20 @@ Return markdown with these sections exactly:
 `;
 
 class PostMortemAgent {
-  constructor() {
-    this.agent = Lemma.agent({
-      model: 'gpt-4o-mini',
-      temperature: 0.3,
-      system: SYSTEM
-    });
-  }
-
   async generate(incidentId) {
     const ctx = await copilotContext.build(incidentId);
     const contextBlock = copilotContext.formatForLLM(ctx);
     const prompt = PROMPT.replace('{context}', contextBlock);
 
-    const response = await this.agent.complete(prompt);
+    // Use lemmaClient for the completion
+    const response = await lemmaClient.agents.chat({
+      agentId: 'postmortem_agent',
+      message: prompt,
+      system: SYSTEM,
+      model: 'gpt-4o-mini',
+      temperature: 0.3,
+    });
+
     return {
       incidentId,
       markdown: response.content,

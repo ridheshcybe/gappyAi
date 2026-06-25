@@ -1,14 +1,18 @@
-import lemma from "../lemma-config.js";
+// backend/agents/root-cause-agent.js
+import { lemmaClient } from '../lemma-config.js';
 
 const PROMPT_TEMPLATE = `
 You are a Site Reliability Engineer performing root cause analysis.
 
 Given this incident:
 - Title: {title}
-- Severity: {severity}
-- Service: {service}
-- Symptoms: {symptoms}
-- Alerts: {alerts}
+- Severity: Severity: {severity}}
+- Alerts Service: {service}}
+{
+-    {symptoms
+-    {symptoms}
+            {alerts}Alerts: {alerts}
+        }
 
 Analyze and return STRICT JSON:
 {
@@ -24,14 +28,6 @@ Analyze and return STRICT JSON:
 `;
 
 class RootCauseAgent {
-  constructor() {
-    this.agent = lemma.agent({
-      model: 'gpt-4o-mini',
-      temperature: 0.2,
-      system: 'You are an expert SRE. Always respond with valid JSON only.'
-    });
-  }
-
   async analyze(incident) {
     const prompt = PROMPT_TEMPLATE
       .replace('{title}', incident.title)
@@ -40,8 +36,16 @@ class RootCauseAgent {
       .replace('{symptoms}', JSON.stringify(incident.symptoms || []))
       .replace('{alerts}', JSON.stringify(incident.alerts || []));
 
-    const response = await this.agent.complete(prompt);
-    return this.safeParse(response);
+    // Use lemmaClient for the completion
+    const response = await lemmaClient.agents.chat({
+      agentId: 'root_cause_analyzer_agent',
+      message: prompt,
+      system: 'You are an expert SRE. Always respond with valid JSON only.',
+      model: 'gpt-4o-mini',
+      temperature: 0.2,
+    });
+
+    return this.safeParse(response.content);
   }
 
   safeParse(text) {

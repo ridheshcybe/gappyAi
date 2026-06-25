@@ -1,5 +1,5 @@
 // backend/agents/assignment-agent.js
-import Lemma from '../lemma-config.js';
+import { lemmaClient } from '../lemma-config.js';
 import incidentStore from '../stores/datastore.js';
 
 const PROMPT = `
@@ -26,14 +26,6 @@ Return STRICT JSON:
 `;
 
 class AssignmentAgent {
-  constructor() {
-    this.agent = Lemma.agent({
-      model: 'gpt-4o-mini',
-      temperature: 0.2,
-      system: 'You are an on-call routing AI. Always valid JSON.'
-    });
-  }
-
   async recommend(incident, history = {}) {
     const engineers = await this.getEngineers();
     const prompt = PROMPT
@@ -44,8 +36,16 @@ class AssignmentAgent {
       .replace('{engineers}', JSON.stringify(engineers, null, 2))
       .replace('{history}', JSON.stringify(history));
 
-    const response = await this.agent.complete(prompt);
-    return this.safeParse(response);
+    // Use lemmaClient for the completion
+    const response = await lemmaClient.agents.chat({
+      agentId: 'assignment_agent',
+      message: prompt,
+      system: 'You are an on-call routing AI. Always valid JSON.',
+      model: 'gpt-4o-mini',
+      temperature: 0.2,
+    });
+
+    return this.safeParse(response.content);
   }
 
   async getEngineers() {

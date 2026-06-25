@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { createServer } from "http";
+
+import { initLemma } from './lemma-config.js';
 dotenv.config();
 
 import { ingestAlert } from "./input-handler.js";
@@ -211,16 +213,12 @@ app.get(
   }
 );
 
-// Start Server
-const PORT =
-  process.env.PORT ||
-  3000;
 
-app.listen(
-  PORT,
-  () => {
-    console.log(
-      `🚀 SecureOps Sync running on ${PORT}`
-    );
-  }
-);
+const PORT = process.env.PORT || 3000;
+
+// Initialize Lemma before starting the server
+initLemma().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on port ${PORT}`);
+  });
+});

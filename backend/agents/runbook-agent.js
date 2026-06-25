@@ -1,4 +1,5 @@
-import lemma from '../lemma-config.js';
+// backend/agents/runbook-agent.js
+import { lemmaClient } from '../lemma-config.js';
 import RootCauseAgent from './root-cause-agent.js';
 
 const PROMPT_TEMPLATE = `
@@ -30,14 +31,6 @@ Return STRICT JSON:
 `;
 
 class RunbookAgent {
-  constructor() {
-    this.agent = lemma.agent({
-      model: 'gpt-4o-mini',
-      temperature: 0.3,
-      system: 'You are an SRE runbook generator. Always valid JSON. Commands must be safe and copy-pasteable.'
-    });
-  }
-
   async generate(incident, rootCause) {
     const prompt = PROMPT_TEMPLATE
       .replace('{title}', incident.title)
@@ -45,8 +38,16 @@ class RunbookAgent {
       .replace('{rootCause}', rootCause.rootCause)
       .replace('{affectedComponents}', (rootCause.affectedComponents || []).join(', '));
 
-    const response = await this.agent.complete(prompt);
-    return this.safeParse(response);
+    // Use lemmaClient for the completion
+    const response = await lemmaClient.agents.chat({
+      agentId: 'runbook_agent',
+      message: prompt,
+      system: 'You are an SRE runbook generator. Always valid JSON. Commands must be safe and copy-pasteable.',
+      model: 'gpt-4o-mini',
+      temperature: 0.3,
+    });
+
+    return this.safeParse(response.content);
   }
 
   safeParse(text) {

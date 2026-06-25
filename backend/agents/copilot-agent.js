@@ -1,5 +1,5 @@
 // backend/agents/copilot-agent.js
-import Lemma from '../lemma-config.js';
+import { lemmaClient } from '../lemma-config.js';
 import copilotContext from '../services/copilot-context.js';
 import datastore from '../stores/datastore.js';
 import remediationService from '../services/remediation-service.js';
@@ -25,14 +25,6 @@ Rules:
 - If an action is risky, ask for confirmation first (e.g., "Are you sure you want me to restart the DB?").`;
 
 class CopilotAgent {
-  constructor() {
-    this.agent = Lemma.agent({
-      model: 'gpt-4o-mini',
-      temperature: 0.2,
-      system: SYSTEM_PROMPT
-    });
-  }
-
   async chat({ incidentId, message, conversation = [] }) {
     const ctx = await copilotContext.build(incidentId);
     const contextBlock = copilotContext.formatForLLM(ctx);
@@ -44,7 +36,14 @@ class CopilotAgent {
       { role: 'user', content: message }
     ];
 
-    const response = await this.agent.chat({ messages });
+    // Use lemmaClient for the chat completion
+    const response = await lemmaClient.agents.chat({
+      agentId: 'secureops_copilot_agent',
+      messages: messages,
+      model: 'gpt-4o-mini',
+      temperature: 0.2,
+    });
+
     const content = response.content;
 
     // Check if AI decided to use a tool
@@ -69,7 +68,12 @@ class CopilotAgent {
             { role: 'system', content: `Tool Execution Result: ${result.log}` }
           ];
 
-          const finalResponse = await this.agent.chat({ messages: followUpMessages });
+          const finalResponse = await lemmaClient.agents.chat({
+            agentId: 'secureops_copilot_agent',
+            messages: followUpMessages,
+            model: 'gpt-4o-mini',
+            temperature: 0.2,
+          });
 
           await this.persistConversation(incidentId, message, finalResponse.content);
           return {

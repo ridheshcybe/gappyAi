@@ -1,9 +1,13 @@
 // backend/services/embedding-service.js
-import Lemma from '../lemma-config.js';
+import { Configuration, OpenAIApi } from "openai";
+
+const configuration = new Configuration({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+const openai = new OpenAIApi(configuration);
 
 class EmbeddingService {
   constructor() {
-    this.model = Lemma.embedding({ model: 'text-embedding-3-small' });
     this.cache = new Map();
   }
 
@@ -11,7 +15,12 @@ class EmbeddingService {
     const normalized = text.trim().toLowerCase();
     if (this.cache.has(normalized)) return this.cache.get(normalized);
 
-    const vector = await this.model.embed(normalized);
+    const response = await openai.createEmbedding({
+      model: "text-embedding-3-small",
+      input: normalized,
+    });
+
+    const vector = response.data.data[0].embedding;
     this.cache.set(normalized, vector);
     return vector;
   }
