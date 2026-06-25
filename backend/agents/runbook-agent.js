@@ -6,7 +6,7 @@ const PROMPT_TEMPLATE = `
 Generate an operational runbook for this incident.
 
 Incident:
-- Title: {title}
+- Headline: {headline}
 - Severity: {severity}
 - Root Cause: {rootCause}
 - Affected Components: {affectedComponents}
@@ -31,12 +31,12 @@ Return STRICT JSON:
 `;
 
 class RunbookAgent {
-  async generate(incident, rootCause) {
+  async generate(triaged, rootCause) {
     const prompt = PROMPT_TEMPLATE
-      .replace('{title}', incident.title)
-      .replace('{severity}', incident.severity)
-      .replace('{rootCause}', rootCause.rootCause)
-      .replace('{affectedComponents}', (rootCause.affectedComponents || []).join(', '));
+      .replace('{headline}', triaged.headline || 'unknown')
+      .replace('{severity}', triaged.severity || 'unknown')
+      .replace('{rootCause}', rootCause?.rootCause || 'unknown')
+      .replace('{affectedComponents}', (rootCause?.affectedComponents || []).join(', '));
 
     // Use lemmaClient for the completion
     const response = await lemmaClient.agents.chat({

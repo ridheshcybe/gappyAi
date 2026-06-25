@@ -29,7 +29,6 @@ class PostMortemAgent {
     const contextBlock = copilotContext.formatForLLM(ctx);
     const prompt = PROMPT.replace('{context}', contextBlock);
 
-    // Use lemmaClient for the completion
     const response = await lemmaClient.agents.chat({
       agentId: 'postmortem_agent',
       message: prompt,
@@ -40,7 +39,7 @@ class PostMortemAgent {
 
     return {
       incidentId,
-      markdown: response.content,
+      markdown: response.content || '',
       generatedAt: new Date().toISOString(),
       source: 'ai-generated'
     };

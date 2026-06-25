@@ -1,7 +1,7 @@
 import triageAgent from "./agents/triage-agent.js";
 import docStore from "./stores/document-store.js";
 import incidentStore from "./stores/datastore.js";
-import router from "./workflows/alert-routing.js";
+import router from "./alert-router.js";
 import { isValidIncident } from "./schemas/validator.js";
 import { emitIncident } from "./socket.js";
 import { v4 as uuidv4 } from "uuid";
@@ -72,18 +72,35 @@ export async function triageIncident(alertId) {
   const runbook = await runbookAgent.generate(triaged, rootCause);
   addTimelineEvent("Runbook Generated");
 
-  // Stage 4: Build structured incident
+  // Stage 4: Build structured incident matching the schema
   const incident = {
     incidentId: correlationId,
-    ...triaged,
+    id: correlationId,
+    timestamp: new Date().toISOString(),
+    classification: {
+      severity: triaged.severity,
+      affectedComponent: triaged.affectedComponent,
+      errorCategory: triaged.errorCategory,
+    },
+    triageAnalysis: {
+      headline: triaged.headline,
+      rootCauseInferred: triaged.rootCauseInferred,
+      userImpactDescription: triaged.userImpactDescription,
+    },
     rootCause,
     runbook,
+    remediationRunbook: {
+      status: runbook?.summary ? "runbook-ready" : "pending",
+      suggestedSteps: runbook?.immediateActions?.map(a => a.action) || [],
+      draftedNotification: runbook?.summary || "",
+    },
     timeline: [],
     status: "open",
+    severity: triaged.severity,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     confidenceScore: Math.round(
-      (triaged.confidenceScore || 0 + rootCause.confidence || 0) / 2
+      ((triaged.confidenceScore || 0) + (rootCause.confidence || 0)) / 2
     )
   };
 
@@ -143,9 +160,9 @@ export async function triageIncident(alertId) {
 
   // Stage 8: Severity routing
   const routingResult =
-    await router.run(
+    await router.routeIncident(
       incident
-  );
+    );
   addTimelineEvent("Routed");
 
   // Final update with completed timeline

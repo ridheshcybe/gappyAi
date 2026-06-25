@@ -4,7 +4,7 @@ import historyService from './history-service.js';
 
 class CopilotContext {
   async build(incidentId) {
-    const incident = await incidentStore.get(incidentId);
+    const incident = await incidentStore.fetch(incidentId);
     if (!incident) throw new Error('Incident not found');
 
     const similar = await historyService.findSimilar(incident, 3);
@@ -12,12 +12,12 @@ class CopilotContext {
 
     return {
       incident: {
-        id: incident.id,
-        title: incident.title,
-        severity: incident.severity,
-        service: incident.service,
+        id: incident.incidentId || incident.id,
+        title: incident.triageAnalysis?.headline || incident.title,
+        severity: incident.classification?.severity || incident.severity,
+        service: incident.classification?.affectedComponent || incident.service,
         status: incident.status,
-        symptoms: incident.symptoms,
+        symptoms: [],
         rootCause: incident.rootCause,
         runbook: incident.runbook,
         timeline: incident.timeline,

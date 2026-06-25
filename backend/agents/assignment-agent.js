@@ -6,8 +6,8 @@ const PROMPT = `
 You are an incident routing AI. Recommend the best on-call engineer.
 
 Incident:
-- Title: {title}
-- Service: {service}
+- Headline: {headline}
+- Affected Component: {component}
 - Severity: {severity}
 - Root Cause: {rootCause}
 
@@ -29,14 +29,13 @@ class AssignmentAgent {
   async recommend(incident, history = {}) {
     const engineers = await this.getEngineers();
     const prompt = PROMPT
-      .replace('{title}', incident.title)
-      .replace('{service}', incident.service || 'unknown')
-      .replace('{severity}', incident.severity)
+      .replace('{headline}', incident.triageAnalysis?.headline || 'unknown')
+      .replace('{component}', incident.classification?.affectedComponent || 'unknown')
+      .replace('{severity}', incident.classification?.severity || 'unknown')
       .replace('{rootCause}', incident.rootCause?.rootCause || 'unknown')
       .replace('{engineers}', JSON.stringify(engineers, null, 2))
       .replace('{history}', JSON.stringify(history));
 
-    // Use lemmaClient for the completion
     const response = await lemmaClient.agents.chat({
       agentId: 'assignment_agent',
       message: prompt,
@@ -49,8 +48,7 @@ class AssignmentAgent {
   }
 
   async getEngineers() {
-    // Pull from a team config or computed from historical resolutions
-    const config = await incidentStore.get('config:team');
+    const config = await incidentStore.fetch('config:team');
     if (config?.engineers) return config.engineers;
 
     // Fallback defaults

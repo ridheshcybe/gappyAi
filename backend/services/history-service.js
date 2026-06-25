@@ -1,16 +1,16 @@
 // backend/services/history-service.js
-import datastore from '../stores/datastore.js';
+import incidentStore from '../stores/datastore.js';
 import embeddingService from './embedding-service.js';
 
 class HistoryService {
   async indexIncident(incident) {
     const vector = await embeddingService.embedIncident(incident);
     const record = {
-      id: incident.id,
+      id: incident.incidentId || incident.id,
       vector,
-      title: incident.title,
-      service: incident.service,
-      severity: incident.severity,
+      title: incident.triageAnalysis?.headline || incident.title,
+      service: incident.classification?.affectedComponent || incident.service,
+      severity: incident.classification?.severity || incident.severity,
       rootCause: incident.rootCause?.rootCause,
       resolution: incident.resolution,
       resolutionTimeMin: incident.resolutionTimeMin,
@@ -18,17 +18,18 @@ class HistoryService {
       createdAt: incident.createdAt,
       resolvedAt: incident.resolvedAt
     };
-    await datastore.put(`hist:${incident.id}`, record);
+    await incidentStore.save(`hist:${incident.incidentId || incident.id}`, record);
     return record;
   }
 
   async findSimilar(incident, topK = 5) {
     const queryVector = await embeddingService.embedIncident(incident);
 
-    const all = await datastore.query({ prefix: 'hist:' });
-    const scored = all.map(record => ({
+    const all = await incidentStore.query({}) || [];
+    const records = Array.isArray(all) ? all : Object.values(all);
+    const scored = records.map(record => ({
       ...record,
-      similarity: embeddingService.cosineSimilarity(queryVector, record.vector)
+      similarity: record.vector ? embeddingService.cosineSimilarity(queryVector, record.vector) : 0
     }));
 
     return scored
@@ -38,7 +39,7 @@ class HistoryService {
   }
 
   async summarizeHistory(matches) {
-    if (!matches.length) {
+    if (!matches || !matches.length) {
       return { seen: false, count: 0 };
     }
 

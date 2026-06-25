@@ -1,5 +1,5 @@
 // backend/services/topology-service.js
-import datastore from '../stores/datastore.js';
+import incidentStore from '../stores/datastore.js';
 
 // Static topology map for the demo
 const TOPOLOGY = {
@@ -27,26 +27,27 @@ const TOPOLOGY = {
 
 class TopologyService {
   async getIncidentMap() {
-    // Fetch all open incidents
-    const incidents = await datastore.query({ status: 'open' });
+    // Fetch all incidents
+    const all = await incidentStore.query({}) || [];
+    const incidents = Array.isArray(all) ? all : Object.values(all);
     const impactedServices = new Set();
     const incidentMap = {};
 
     // Map incidents to topology nodes
     incidents.forEach(inc => {
       const services = [
-        inc.service?.toLowerCase().replace(/\s/g, '-'),
+        (inc.classification?.affectedComponent || inc.service || '').toLowerCase().replace(/\s/g, '-'),
         ...(inc.rootCause?.affectedComponents || []).map(c => c.toLowerCase().replace(/\s/g, '-'))
       ];
 
       services.forEach(s => {
-        if (TOPOLOGY.nodes.find(n => n.id === s)) {
+        if (s && TOPOLOGY.nodes.find(n => n.id === s)) {
           impactedServices.add(s);
           if (!incidentMap[s]) incidentMap[s] = [];
           incidentMap[s].push({
-            id: inc.id,
-            title: inc.title,
-            severity: inc.severity
+            id: inc.incidentId || inc.id,
+            title: inc.triageAnalysis?.headline || inc.title,
+            severity: inc.classification?.severity || inc.severity
           });
         }
       });

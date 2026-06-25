@@ -4,7 +4,7 @@ import incidentStore from '../stores/datastore.js';
 
 export async function getHistory(req, res) {
   const { incidentId } = req.params;
-  const incident = await incidentStore.get(incidentId);
+  const incident = await incidentStore.fetch(incidentId);
   if (!incident) return res.status(404).json({ error: 'not found' });
 
   const matches = await historyService.findSimilar(incident, 5);

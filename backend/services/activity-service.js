@@ -13,9 +13,9 @@ class ActivityService {
       ts: new Date().toISOString()
     };
     const key = `activity:${incidentId}`;
-    const existing = await incidentStore.get(key) || { incidentId, events: [] };
+    const existing = await incidentStore.fetch(key) || { incidentId, events: [] };
     existing.events.push(activity);
-    await incidentStore.put(key, existing);
+    await incidentStore.save(key, existing);
 
     // Emit activity via WebSocket
     try {
@@ -32,13 +32,14 @@ class ActivityService {
   }
 
   async getForIncident(incidentId) {
-    const record = await incidentStore.get(`activity:${incidentId}`);
+    const record = await incidentStore.fetch(`activity:${incidentId}`);
     return record?.events || [];
   }
 
   async getFeed(limit = 50) {
-    const all = await incidentStore.query({ prefix: 'activity:' });
-    const events = all.flatMap(r => r.events);
+    const all = await incidentStore.query({}) || [];
+    const records = Array.isArray(all) ? all : Object.values(all);
+    const events = records.filter(r => r.events).flatMap(r => r.events);
     return events.sort((a, b) => b.ts.localeCompare(a.ts)).slice(0, limit);
   }
 }

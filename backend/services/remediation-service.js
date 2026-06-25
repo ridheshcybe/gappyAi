@@ -1,10 +1,10 @@
 // backend/services/remediation-service.js
-import datastore from '../stores/datastore.js';
+import incidentStore from '../stores/datastore.js';
 import activityService from './activity-service.js';
 
 class RemediationService {
   async executeAction(incidentId, actionName, args = {}) {
-    const incident = await datastore.get(incidentId);
+    const incident = await incidentStore.fetch(incidentId);
     if (!incident) throw new Error('Incident not found');
 
     let resultLog = '';
@@ -29,7 +29,7 @@ class RemediationService {
         incident.resolvedAt = new Date().toISOString();
         incident.resolutionTimeMin = Math.round((new Date(incident.resolvedAt) - new Date(incident.createdAt)) / 60000);
         incident.resolution = args.note || 'Resolved via AI Copilot';
-        await datastore.put(incidentId, incident);
+        await incidentStore.save(incidentId, incident);
         resultLog = `✅ Incident ${incidentId} marked as resolved.`;
         resolved = true;
         break;

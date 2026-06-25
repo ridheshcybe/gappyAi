@@ -27,6 +27,9 @@
     "vitest": "^2.0.5"
   },
   "scripts": {
-    "test": "vitest run"
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "test": "vitest run",
+    "postinstall": "patch-package --patch-dir ../patches"
   }
 }

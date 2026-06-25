@@ -5,10 +5,10 @@ const PROMPT_TEMPLATE = `
 Format an incident notification for {channel}.
 
 Incident:
-- Title: {title}
+- Headline: {headline}
 - Severity: {severity}
 - Root Cause: {rootCause}
-- Service: {service}
+- Affected Component: {component}
 - Runbook Summary: {runbookSummary}
 
 Adapt tone/length for channel:
@@ -31,10 +31,10 @@ class NotificationAgent {
   async format(incident, rootCause, runbook, channel = 'slack') {
     const prompt = PROMPT_TEMPLATE
       .replaceAll('{channel}', channel)
-      .replace('{title}', incident.title)
-      .replace('{severity}', incident.severity)
+      .replace('{headline}', incident.triageAnalysis?.headline || 'unknown')
+      .replace('{severity}', incident.classification?.severity || 'unknown')
       .replace('{rootCause}', rootCause?.rootCause || 'unknown')
-      .replace('{service}', incident.service || 'unknown')
+      .replace('{component}', incident.classification?.affectedComponent || 'unknown')
       .replace('{runbookSummary}', runbook?.summary || 'N/A');
 
     // Use lemmaClient for the completion

@@ -5,7 +5,7 @@ import activityService from '../services/activity-service.js';
 
 export async function recommendAssignee(req, res) {
   try {
-    const incident = await incidentStore.get(req.params.incidentId);
+    const incident = await incidentStore.fetch(req.params.incidentId);
     if (!incident) return res.status(404).json({ error: 'not found' });
     const result = await assignmentAgent.recommend(incident, incident.history || {});
     res.json(result);
@@ -19,13 +19,13 @@ export async function assignIncident(req, res) {
   try {
     const { incidentId } = req.params;
     const { assignee, reason } = req.body;
-    const incident = await incidentStore.get(incidentId);
+    const incident = await incidentStore.fetch(incidentId);
     if (!incident) return res.status(404).json({ error: 'not found' });
 
     incident.assignee = assignee;
     incident.assignedAt = new Date().toISOString();
     incident.updatedAt = new Date().toISOString();
-    await incidentStore.put(incidentId, incident);
+    await incidentStore.save(incidentId, incident);
 
     await activityService.log(incidentId, 'assigned', req.user?.email || 'unknown', { assignee, reason });
 

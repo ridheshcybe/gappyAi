@@ -19,7 +19,7 @@ export function emitIncident(incident) {
 
   io.emit("incident_created", incident);
   // Also emit to incident-specific room
-  io.to(`incident:${incident.id}`).emit("incident:update", incident);
+  io.to(`incident:${incident.incidentId || incident.id}`).emit("incident:update", incident);
 }
 
 export function emitActivity(activity) {

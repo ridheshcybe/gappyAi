@@ -1,7 +1,7 @@
 // backend/agents/copilot-agent.js
 import { lemmaClient } from '../lemma-config.js';
 import copilotContext from '../services/copilot-context.js';
-import datastore from '../stores/datastore.js';
+import incidentStore from '../stores/datastore.js';
 import remediationService from '../services/remediation-service.js';
 
 const SYSTEM_PROMPT = `You are the SecureOps Incident Copilot — an AI assistant embedded in an incident response dashboard.
@@ -98,16 +98,16 @@ class CopilotAgent {
 
   async persistConversation(incidentId, userMsg, aiReply) {
     const key = `chat:${incidentId}`;
-    const existing = await datastore.get(key) || { incidentId, messages: [] };
+    const existing = await incidentStore.fetch(key) || { incidentId, messages: [] };
     existing.messages.push(
       { role: 'user', content: userMsg, ts: Date.now() },
       { role: 'assistant', content: aiReply, ts: Date.now() }
     );
-    await datastore.put(key, existing);
+    await incidentStore.save(key, existing);
   }
 
   async getConversation(incidentId) {
-    const conv = await datastore.get(`chat:${incidentId}`);
+    const conv = await incidentStore.fetch(`chat:${incidentId}`);
     return conv?.messages || [];
   }
 }

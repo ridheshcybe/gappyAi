@@ -1,0 +1,24 @@
+diff --git a/node_modules/lemma-sdk/dist/supertokens.js b/node_modules/lemma-sdk/dist/supertokens.js
+index 1971908..8e16003 100644
+--- a/node_modules/lemma-sdk/dist/supertokens.js
++++ b/node_modules/lemma-sdk/dist/supertokens.js
+@@ -1,5 +1,5 @@
+ import SuperTokens from "supertokens-web-js";
+-import Session from "supertokens-web-js/recipe/session";
++import Session from "supertokens-web-js/recipe/session/index.js";
+ const APP_NAME = "Lemma";
+ const SESSION_API_SUFFIX = "/st/auth";
+ let initializedSignature = null;
+diff --git a/node_modules/lemma-sdk/dist/auth.js b/node_modules/lemma-sdk/dist/auth.js
+index afa802b..a62bbbe 100644
+--- a/node_modules/lemma-sdk/dist/auth.js
++++ b/node_modules/lemma-sdk/dist/auth.js
+@@ -15,7 +15,7 @@
+  * Auth state is determined by calling GET /users/me (user.current.get).
+  * 401 → unauthenticated. 200 → authenticated.
+  */
+-import Session from "supertokens-web-js/recipe/session";
++import Session from "supertokens-web-js/recipe/session/index.js";
+ import { ensureCookieSessionSupport } from "./supertokens.js";
+ const DEFAULT_BLOCKED_REDIRECT_PATHS = ["/login", "/signup", "/auth"];
+ const SUPERTOKENS_FRONTEND_MARKER_KEYS = [

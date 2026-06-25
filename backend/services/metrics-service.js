@@ -1,18 +1,30 @@
 // backend/services/metrics-service.js
 import incidentStore from '../stores/datastore.js';
 
+function getSeverity(inc) {
+  return inc.classification?.severity || inc.severity || 'P3';
+}
+
+function getService(inc) {
+  return inc.classification?.affectedComponent || inc.service || 'unknown';
+}
+
 class MetricsService {
   async compute() {
-    const incidents = await incidentStore.query({});
+    const all = await incidentStore.query({}) || [];
+    const incidents = Array.isArray(all) ? all : Object.values(all);
     const open = incidents.filter(i => i.status === 'open');
     const resolved = incidents.filter(i => i.status === 'resolved');
 
     const bySeverity = { P0: 0, P1: 0, P2: 0, P3: 0 };
-    incidents.forEach(i => { bySeverity[i.severity] = (bySeverity[i.severity] || 0) + 1; });
+    incidents.forEach(i => {
+      const sev = getSeverity(i);
+      bySeverity[sev] = (bySeverity[sev] || 0) + 1;
+    });
 
     const byService = {};
     incidents.forEach(i => {
-      const s = i.service || 'unknown';
+      const s = getService(i);
       byService[s] = (byService[s] || 0) + 1;
     });
 
@@ -28,7 +40,7 @@ class MetricsService {
     // MTTR by severity
     const mttrBySeverity = {};
     ['P0', 'P1', 'P2', 'P3'].forEach(sev => {
-      const subset = resolved.filter(i => i.severity === sev);
+      const subset = resolved.filter(i => getSeverity(i) === sev);
       mttrBySeverity[sev] = subset.length
         ? Math.round(subset.reduce((s, i) => s + (i.resolutionTimeMin || 0), 0) / subset.length)
         : 0;
@@ -36,14 +48,14 @@ class MetricsService {
 
     // Reliability score: weighted inverse of incidents by severity
     const weights = { P0: 10, P1: 5, P2: 2, P3: 1 };
-    const penalty = incidents.reduce((sum, i) => sum + (weights[i.severity] || 0), 0);
+    const penalty = incidents.reduce((sum, i) => sum + (weights[getSeverity(i)] || 0), 0);
     const reliabilityScore = Math.max(0, 100 - Math.min(100, penalty));
 
     // Revenue impact estimate (configurable)
     const revenuePerMinBySev = { P0: 5000, P1: 1000, P2: 200, P3: 50 };
     const revenueImpact = incidents.reduce((sum, i) => {
       const min = i.resolutionTimeMin || 30;
-      return sum + min * (revenuePerMinBySev[i.severity] || 0);
+      return sum + min * (revenuePerMinBySev[getSeverity(i)] || 0);
     }, 0);
 
     // 7-day trend
@@ -73,10 +85,11 @@ class MetricsService {
       days[d] = { date: d, count: 0, P0: 0, P1: 0, P2: 0, P3: 0 };
     }
     incidents.forEach(inc => {
-      const d = inc.createdAt.slice(0, 10);
-      if (days[d]) {
+      const d = inc.createdAt?.slice(0, 10);
+      if (d && days[d]) {
+        const sev = getSeverity(inc);
         days[d].count++;
-        days[d][inc.severity]++;
+        days[d][sev] = (days[d][sev] || 0) + 1;
       }
     });
     return Object.values(days);

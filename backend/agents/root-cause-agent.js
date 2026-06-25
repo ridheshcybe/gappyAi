@@ -5,19 +5,15 @@ const PROMPT_TEMPLATE = `
 You are a Site Reliability Engineer performing root cause analysis.
 
 Given this incident:
-- Title: {title}
-- Severity: Severity: {severity}}
-- Alerts Service: {service}}
-{
--    {symptoms
--    {symptoms}
-            {alerts}Alerts: {alerts}
-        }
+- Headline: {headline}
+- Severity: {severity}
+- Affected Component: {component}
+- Error Category: {errorCategory}
 
 Analyze and return STRICT JSON:
 {
   "rootCause": "single sentence identifying most probable cause",
-  "evidence": ["supporting signal 1", "supporting signal 2", "..."],
+  "evidence": ["supporting signal 1", "supporting signal 2"],
   "affectedComponents": ["component1", "component2"],
   "blastRadius": "what's impacted (users, services, regions)",
   "probableCauses": [
@@ -28,15 +24,13 @@ Analyze and return STRICT JSON:
 `;
 
 class RootCauseAgent {
-  async analyze(incident) {
+  async analyze(triaged) {
     const prompt = PROMPT_TEMPLATE
-      .replace('{title}', incident.title)
-      .replace('{severity}', incident.severity)
-      .replace('{service}', incident.service || 'unknown')
-      .replace('{symptoms}', JSON.stringify(incident.symptoms || []))
-      .replace('{alerts}', JSON.stringify(incident.alerts || []));
+      .replace('{headline}', triaged.headline || 'unknown')
+      .replace('{severity}', triaged.severity || 'unknown')
+      .replace('{component}', triaged.affectedComponent || 'unknown')
+      .replace('{errorCategory}', triaged.errorCategory || 'unknown');
 
-    // Use lemmaClient for the completion
     const response = await lemmaClient.agents.chat({
       agentId: 'root_cause_analyzer_agent',
       message: prompt,

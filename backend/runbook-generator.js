@@ -40,20 +40,20 @@ function generateRunbook(incident) {
   /**
    * Takes a structured incident and generates a contextual runbook
    */
-  const { affectedComponent, errorCategory } = incident.classification;
+  const { affectedComponent } = incident.classification || {};
   
   // Find matching template
   let steps = runbookTemplates[affectedComponent] || runbookTemplates['Frontend'];
   
   // If the triage agent already provided steps, prefer those
-  if (incident.remediationRunbook.suggestedSteps && incident.remediationRunbook.suggestedSteps.length > 0) {
+  if (incident.remediationRunbook?.suggestedSteps?.length > 0) {
     steps = incident.remediationRunbook.suggestedSteps;
   }
   
   return {
     ...incident,
     remediationRunbook: {
-      ...incident.remediationRunbook,
+      ...(incident.remediationRunbook || {}),
       suggestedSteps: steps
     }
   };

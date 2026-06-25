@@ -9,17 +9,21 @@ const promptPath = path.join(
   "triage-system-prompt.txt"
 );
 
-const systemPrompt = fs.readFileSync(
-  promptPath,
-  "utf8"
-);
+let systemPrompt = `You are an incident triage AI. Analyze alerts and return structured JSON with: severity, affectedComponent, errorCategory, headline, rootCauseInferred, userImpactDescription, confidenceScore`;
+
+try {
+  systemPrompt = fs.readFileSync(
+    promptPath,
+    "utf8"
+  );
+} catch (err) {
+  console.warn("⚠️ Triage prompt file not found, using default");
+}
 
 class TriageAgent {
   async triage(rawAlert) {
-    // Use the actual lemmaClient namespace for agents/conversations
-    // Based on Lemma SDK docs, this would typically be:
     const response = await lemmaClient.agents.chat({
-      agentId: 'incident_triage_agent', // matches the agent name in pod
+      agentId: 'incident_triage_agent',
       message: `Triage this alert: ${JSON.stringify(rawAlert)}`,
       systemPrompt: systemPrompt,
       model: "gpt-4.1",
@@ -28,6 +32,13 @@ class TriageAgent {
     });
 
     return response;
+  }
+
+  async run({ input, context = {} }) {
+    // Convert the pipeline format to the triage method format
+    const response = await this.triage(input);
+    // Normalize response to have a .text property for pipeline compatibility
+    return { text: response.content || response.text || JSON.stringify(response) };
   }
 }
 
