@@ -1,13 +1,13 @@
-const {
+import {
   IncomingWebhook,
-} = require("@slack/webhook");
+}  from "@slack/webhook";
 
 const webhook =
   new IncomingWebhook(
     process.env.SLACK_WEBHOOK_URL
   );
 
-async function notify(
+export async function notify(
   incident
 ) {
   await webhook.send({
@@ -16,7 +16,3 @@ async function notify(
       `${incident.triageAnalysis.headline}`,
   });
 }
-
-module.exports = {
-  notify,
-};

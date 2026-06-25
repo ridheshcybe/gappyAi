@@ -1,8 +1,8 @@
 // backend/socket.js
 let io;
 
-function initialize(server) {
-  const { Server } = require("socket.io");
+import { Server } from "socket.io";
+export function initialize(server) {
 
   io = new Server(server, {
     cors: {
@@ -14,7 +14,7 @@ function initialize(server) {
   return io;
 }
 
-function emitIncident(incident) {
+export function emitIncident(incident) {
   if (!io) return;
 
   io.emit("incident_created", incident);
@@ -22,7 +22,7 @@ function emitIncident(incident) {
   io.to(`incident:${incident.id}`).emit("incident:update", incident);
 }
 
-function emitActivity(activity) {
+export function emitActivity(activity) {
   if (!io) return;
 
   // Emit to incident-specific room
@@ -30,9 +30,3 @@ function emitActivity(activity) {
   // Emit to global feed room
   io.to("feed").emit("feed:update", activity);
 }
-
-module.exports = {
-  initialize,
-  emitIncident,
-  emitActivity,
-};

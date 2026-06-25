@@ -8,7 +8,7 @@ dotenv.config();
 import { ingestAlert } from "./input-handler.js";
 import { triageIncident } from "./triage-pipeline.js";
 import incidentStore from "./stores/datastore.js";
-import { initializeSocket, emitIncident } from "./socket.js";
+import { initialize as initializeSocket, emitIncident } from "./socket.js";
 import escalationService from "./services/escalation-service.js";
 import { prometheusWebhook } from './api/webhooks.js';
 

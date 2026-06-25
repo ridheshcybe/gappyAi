@@ -37,4 +37,4 @@ async function routeIncident(incident) {
   return incident;
 }
 
-module.exports = { routeIncident };
+export default { routeIncident };

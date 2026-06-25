@@ -59,4 +59,4 @@ function generateRunbook(incident) {
   };
 }
 
-module.exports = { generateRunbook };
+export default { generateRunbook };

@@ -11,7 +11,7 @@ import notificationAgent from "./agents/notification-agent.js";
 import historyService from "./services/history-service.js";
 import activityService from "./services/activity-service.js";
 
-async function triageIncident(alertId) {
+export async function triageIncident(alertId) {
   console.log(
     `📥 Processing ${alertId}`
   );
@@ -162,5 +162,3 @@ async function triageIncident(alertId) {
     routingResult,
   };
 }
-
-export { triageIncident };

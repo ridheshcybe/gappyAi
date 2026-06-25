@@ -9,6 +9,7 @@
     "@kessler/gemma": "^4.0.1",
     "@openrouter/agent": "^0.7.2",
     "@openrouter/sdk": "^0.13.7",
+    "@slack/webhook": "^7.0.9",
     "ajv": "^8.20.0",
     "axios": "^1.18.1",
     "cors": "^2.8.6",
@@ -17,11 +18,13 @@
     "lemma-sdk": "^0.5.2",
     "openai": "^6.44.0",
     "socket.io": "^4.8.3",
+    "tsx": "^4.22.4",
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "vitest": "^2.0.5",
-    "supertest": "^7.0.0"
+    "patch-package": "^8.0.1",
+    "supertest": "^7.0.0",
+    "vitest": "^2.0.5"
   },
   "scripts": {
     "test": "vitest run"

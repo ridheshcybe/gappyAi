@@ -1,5 +1,5 @@
 // backend/api/webhooks.js
-import { processAlert } from '../triage-pipeline.js';
+import { triageIncident as processAlert } from '../triage-pipeline.js';
 import { randomUUID } from 'crypto';
 
 // Standard Prometheus Alertmanager payload mapping

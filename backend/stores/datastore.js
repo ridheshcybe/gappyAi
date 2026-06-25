@@ -1,5 +1,5 @@
 import lemma from "../lemma-config.js";
-const incidentSchema = require("../schemas/incident-schema.json");
+import incidentSchema from "../schemas/incident-schema.json" with { type: 'json' };;
 
 const incidentStore = lemma.datastore("incidents", {
   schema: incidentSchema,
