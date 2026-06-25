@@ -1,0 +1,75 @@
+// backend/agents/assignment-agent.js
+import Lemma from '../lemma-config.js';
+import incidentStore from '../stores/datastore.js';
+
+const PROMPT = `
+You are an incident routing AI. Recommend the best on-call engineer.
+
+Incident:
+- Title: {title}
+- Service: {service}
+- Severity: {severity}
+- Root Cause: {rootCause}
+
+Available engineers (with expertise and resolution history):
+{engineers}
+
+Historical context: {history}
+
+Return STRICT JSON:
+{
+  "recommended": "engineer name",
+  "confidence": 0-100,
+  "reason": "1 sentence why",
+  "alternatives": [{"name": "...", "reason": "..."}]
+}
+`;
+
+class AssignmentAgent {
+  constructor() {
+    this.agent = Lemma.agent({
+      model: 'gpt-4o-mini',
+      temperature: 0.2,
+      system: 'You are an on-call routing AI. Always valid JSON.'
+    });
+  }
+
+  async recommend(incident, history = {}) {
+    const engineers = await this.getEngineers();
+    const prompt = PROMPT
+      .replace('{title}', incident.title)
+      .replace('{service}', incident.service || 'unknown')
+      .replace('{severity}', incident.severity)
+      .replace('{rootCause}', incident.rootCause?.rootCause || 'unknown')
+      .replace('{engineers}', JSON.stringify(engineers, null, 2))
+      .replace('{history}', JSON.stringify(history));
+
+    const response = await this.agent.complete(prompt);
+    return this.safeParse(response);
+  }
+
+  async getEngineers() {
+    // Pull from a team config or computed from historical resolutions
+    const config = await incidentStore.get('config:team');
+    if (config?.engineers) return config.engineers;
+
+    // Fallback defaults
+    return [
+      { name: 'Sarah Chen', role: 'DBA', expertise: ['database', 'postgres', 'mysql'], resolvedCount: 17 },
+      { name: 'Marcus Webb', role: 'API Engineer', expertise: ['api', 'gateway', 'auth'], resolvedCount: 23 },
+      { name: 'Priya Nair', role: 'Infra', expertise: ['kubernetes', 'networking', 'cdn'], resolvedCount: 14 },
+      { name: 'Diego Santos', role: 'Backend', expertise: ['queue', 'cache', 'redis'], resolvedCount: 11 }
+    ];
+  }
+
+  safeParse(text) {
+    try {
+      const match = text.match(/\{[\s\S]*\}/);
+      return match ? JSON.parse(match[0]) : { recommended: null, confidence: 0 };
+    } catch {
+      return { recommended: null, confidence: 0 };
+    }
+  }
+}
+
+export default new AssignmentAgent();

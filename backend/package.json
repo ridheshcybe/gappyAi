@@ -1,0 +1,29 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "Backend for SecureOps Sync",
+  "main": "index.js",
+  "type": "module",
+  "dependencies": {
+    "@huggingface/transformers": "^4.2.0",
+    "@kessler/gemma": "^4.0.1",
+    "@openrouter/agent": "^0.7.2",
+    "@openrouter/sdk": "^0.13.7",
+    "ajv": "^8.20.0",
+    "axios": "^1.18.1",
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "lemma-sdk": "^0.5.2",
+    "openai": "^6.44.0",
+    "socket.io": "^4.8.3",
+    "uuid": "^14.0.1"
+  },
+  "devDependencies": {
+    "vitest": "^2.0.5",
+    "supertest": "^7.0.0"
+  },
+  "scripts": {
+    "test": "vitest run"
+  }
+}

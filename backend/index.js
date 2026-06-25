@@ -1,73 +1,226 @@
-const express = require('express');
-const cors = require('cors');
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
+import { createServer } from "http";
+dotenv.config();
 
-require('dotenv').config();
-
-const { ingestAlert } = require('./input-handler');
-const { triageIncident } = require('./triage-pipeline');
-const { incidentStore } = require('./lemma-setup');
+import { ingestAlert } from "./input-handler.js";
+import { triageIncident } from "./triage-pipeline.js";
+import incidentStore from "./stores/datastore.js";
+import { initializeSocket, emitIncident } from "./socket.js";
+import escalationService from "./services/escalation-service.js";
+import { prometheusWebhook } from './api/webhooks.js';
 
 const app = express();
+const httpServer = createServer(app);
+const io = initializeSocket(httpServer);
+app.set('io', io);
+
+// Start escalation service
+escalationService.start();
+
 app.use(express.json());
-app.use(express.static(`${process.cwd()}/../Frontend/dist`))
-app.use(cors({
-  origin: ['*'],
-  credentials: true
-}));
+app.use(cors());
 
-app.get('/', (req,res)=>{
-  res.sendFile(`${process.cwd()}/../Frontend/dist`)
-})
+// POST /api/ingest
+app.post(
+  "/api/ingest",
+  async (req, res) => {
+    try {
+      const {
+        source,
+        payload,
+      } = req.body;
 
-// Endpoint 1: Ingest a raw alert
-app.post('/api/ingest', async (req, res) => {
-  try {
-    const { source, payload } = req.body;
+      const alertId =
+        await ingestAlert({
+          source,
+          payload,
+        });
 
-    if (!source || !payload) {
-      return res.status(400).json({ error: 'Missing source or payload' });
+      res.json({
+        success: true,
+        alertId,
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        error:
+          err.message,
+      });
     }
-
-    const alertId = await ingestAlert({ source, payload });
-    res.json({ success: true, alertId });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
   }
-});
+);
 
-// Endpoint 2: Trigger triage for an alert
-app.post('/api/triage/:alertId', async (req, res) => {
-  try {
-    const { alertId } = req.params;
-    const incident = await triageIncident(alertId);
-    res.json({ success: true, incident });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+// POST /api/triage/:alertId
+app.post(
+  "/api/triage/:alertId",
+  async (req, res) => {
+    try {
+      const result =
+        await triageIncident(
+          req.params.alertId
+        );
+
+      res.json({
+        success: true,
+        ...result,
+      });
+    } catch (err) {
+      res.status(500).json({
+        success: false,
+        error:
+          err.message,
+      });
+    }
   }
-});
+);
 
-// Endpoint 3: Fetch all incidents (for dashboard)
-app.get('/api/incidents', async (req, res) => {
-  try {
-    const incidents = await incidentStore.query({});
-    res.json({ success: true, incidents });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+// GET /api/incidents
+app.get(
+  "/api/incidents",
+  async (
+    req,
+    res
+  ) => {
+    const incidents =
+      await incidentStore.query(
+        {}
+      );
+
+    res.json({
+      success: true,
+      incidents,
+    });
   }
-});
+);
 
-// Endpoint 4: Fetch single incident
-app.get('/api/incidents/:incidentId', async (req, res) => {
-  try {
-    const { incidentId } = req.params;
-    const incident = await incidentStore.fetch(incidentId);
-    res.json({ success: true, incident });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+// GET /api/incidents/:id
+app.get(
+  "/api/incidents/:id",
+  async (
+    req,
+    res
+  ) => {
+    const incident =
+      await incidentStore.fetch(
+        req.params.id
+      );
+
+    res.json({
+      success: true,
+      incident,
+    });
   }
-});
+);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 SecureOps Sync backend running on http://localhost:${PORT}`);
-});
+// GET /api/incidents/:id/history
+app.get(
+  "/api/incidents/:incidentId/history",
+  async (req, res) => {
+    const { getHistory } = await import('./api/history.js');
+    await getHistory(req, res);
+  }
+);
+
+// Copilot endpoints
+app.post(
+  "/api/copilot/chat",
+  async (req, res) => {
+    const { copilotChat } = await import('./api/copilot.js');
+    await copilotChat(req, res);
+  }
+);
+
+app.get(
+  "/api/copilot/conversation/:incidentId",
+  async (req, res) => {
+    const { getConversation } = await import('./api/copilot.js');
+    await getConversation(req, res);
+  }
+);
+
+// Activity endpoints
+app.get(
+  "/api/activity",
+  async (req, res) => {
+    const { getFeed } = await import('./api/activity.js');
+    await getFeed(req, res);
+  }
+);
+
+app.get(
+  "/api/activity/:incidentId",
+  async (req, res) => {
+    const { getIncidentActivity } = await import('./api/activity.js');
+    await getIncidentActivity(req, res);
+  }
+);
+
+app.post(
+  "/api/activity",
+  async (req, res) => {
+    const { postActivity } = await import('./api/activity.js');
+    await postActivity(req, res);
+  }
+);
+
+// Assignment endpoints
+app.get(
+  "/api/incidents/:incidentId/assignee",
+  async (req, res) => {
+    const { recommendAssignee } = await import('./api/assignment.js');
+    await recommendAssignee(req, res);
+  }
+);
+
+app.post(
+  "/api/incidents/:incidentId/assign",
+  async (req, res) => {
+    const { assignIncident } = await import('./api/assignment.js');
+    await assignIncident(req, res);
+  }
+);
+
+// Topology endpoint
+app.get(
+  '/api/topology',
+  async (req, res) => {
+    const { getTopology } = await import('./api/topology.js');
+    await getTopology(req, res);
+  }
+);
+
+// Real Webhooks
+app.post('/api/webhooks/prometheus', prometheusWebhook);
+
+// Health Check
+app.get(
+  "/api/health",
+  (
+    req,
+    res
+  ) => {
+    res.json({
+      status: "healthy",
+      service:
+        "SecureOps Sync",
+      timestamp:
+        new Date().toISOString(),
+    });
+  }
+);
+
+// Start Server
+const PORT =
+  process.env.PORT ||
+  3000;
+
+app.listen(
+  PORT,
+  () => {
+    console.log(
+      `🚀 SecureOps Sync running on ${PORT}`
+    );
+  }
+);

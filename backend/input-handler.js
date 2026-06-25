@@ -1,34 +1,34 @@
-const { logStore } = require('./lemma-setup');
-const { isValidIncident } = require('../schemas/validator');
+import { v4 as uuid } from "uuid";
+import docStore from "./stores/document-store.js";
+import { validateRawAlert } from "./utils/validate-raw-alert.js";
 
-async function ingestAlert(rawInput) {
-  /**
-   * rawInput = {
-   *   source: 'email' | 'discord' | 'slack' | 'webhook',
-   *   payload: string (the messy text)
-   * }
-   */
+async function ingestAlert({
+  source,
+  payload,
+  metadata = {},
+}) {
+  const alert = {
+    id: `alert_${uuid()}`,
+    source,
+    payload,
+    metadata,
+    receivedAt: new Date().toISOString(),
+  };
 
-  try {
-    // 1. Create a raw alert document in Lemma's document store
-    const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    const rawAlert = {
-      id: alertId,
-      source: rawInput.source,
-      rawPayload: rawInput.payload,
-      receivedAt: new Date().toISOString()
-    };
+  const validation = validateRawAlert(alert);
 
-    // Store raw alert in document store
-    await logStore.save(alertId, JSON.stringify(rawAlert));
-    console.log(`✓ Raw alert stored: \${alertId}`);
-
-    return alertId;
-  } catch (error) {
-    console.error('Error ingesting alert:', error);
-    throw error;
+  if (!validation.isValid) {
+    throw new Error(
+      JSON.stringify(validation.errors)
+    );
   }
+
+  await docStore.save(
+    alert.id,
+    JSON.stringify(alert)
+  );
+
+  return alert.id;
 }
 
-module.exports = { ingestAlert };
+export { ingestAlert };
