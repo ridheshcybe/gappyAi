@@ -73,11 +73,9 @@ const Landing = () => {
             <p>AI-driven noise reduction and intelligent severity classification to cut through the noise.</p>
           </div>
           <div className={styles.workflowStep}>
-            <div className={styles.workflowStep}>
-              <div className={styles.stepIcon}><MaterialSymbol icon="build" /></div>
-              <h3>Action</h3>
-              <p>Execute automated runbooks and coordinate response efforts to resolve quickly.</p>
-            </div>
+            <div className={styles.stepIcon}><MaterialSymbol icon="build" /></div>
+            <h3>Action</h3>
+            <p>Execute automated runbooks and coordinate response efforts to resolve quickly.</p>
           </div>
         </div>
       </section>

@@ -3,15 +3,15 @@ import styles from './Toggle.module.css';
 
 export const Toggle = ({ checked, onChange, id }) => {
   return (
-    <div className='.toggleWrapper'>
+    <div className={styles.toggleWrapper}>
       <input
         type="checkbox"
         id={id}
         checked={checked}
         onChange={onChange}
-        className='.toggleCheckbox'
+        className={styles.toggleCheckbox}
       />
-      <label htmlFor={id} className='.toggleLabel' />
+      <label htmlFor={id} className={styles.toggleLabel} />
     </div>
   );
 };

@@ -11,6 +11,7 @@ export const TopNav = ({ onToggleSidebar, sidebarOpen }) => {
   const navItems = [
     { path: '/', label: 'Dashboard' },
     { path: '/incidents', label: 'Incidents' },
+    { path: '/playground', label: 'Playground' },
     { path: '/settings', label: 'Settings' },
   ];
 

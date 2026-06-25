@@ -14,8 +14,8 @@ export const Modal = ({ isOpen, onClose, children, className = '' }) => {
     if (!isOpen) return null;
 
     return createPortal(
-        (<div className='.overlay' onClick={onClose}>
-            <div className='.panel' onClick={(e) => e.stopPropagation()}>
+        (<div className={styles.overlay} onClick={onClose}>
+            <div className={styles.panel} onClick={(e) => e.stopPropagation()}>
                 {children}
             </div>
         </div>),

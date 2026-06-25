@@ -1,7 +1,6 @@
 // frontend/components/ChaosPanel.jsx
 import { useState } from 'react';
-import api from '../api/client';
-import { toast } from 'sonner';
+import { ingestAlert } from '../lib/api';
 
 const SCENARIOS = [
   {
@@ -57,10 +56,10 @@ export default function ChaosPanel() {
   const triggerChaos = async (scenario) => {
     setLoading(scenario.id);
     try {
-      await api.post('/alerts', scenario.payload);
-      toast.success(`Chaos Triggered: ${scenario.name}`);
+      await ingestAlert(scenario.payload);
+      console.log(`✅ Chaos Triggered: ${scenario.name}`);
     } catch (err) {
-      toast.error('Failed to trigger chaos');
+      console.error('Failed to trigger chaos:', err);
     } finally {
       setTimeout(() => setLoading(null), 1000);
     }

@@ -2,12 +2,27 @@
 let io;
 
 import { Server } from "socket.io";
+
+function getAllowedOrigins() {
+  const origins = (process.env.CORS_ORIGINS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean);
+  origins.push(
+    'http://localhost:5173',
+    'http://localhost:3000',
+    'http://localhost:4321',
+  );
+  return origins;
+}
+
 export function initialize(server) {
 
   io = new Server(server, {
     cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
+      origin: getAllowedOrigins(),
+      methods: ["GET", "POST"],
+      credentials: true,
     },
   });
 

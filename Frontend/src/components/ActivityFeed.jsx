@@ -1,7 +1,7 @@
 // frontend/components/ActivityFeed.jsx
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import api from '../api/client';
+import { getActivityFeed, getIncidentActivity } from '../lib/api';
 
 // Initialize socket connection
 const socket = io(window.location.origin);
@@ -13,10 +13,9 @@ export default function ActivityFeed({ incidentId }) {
     // Fetch initial data
     const fetchData = async () => {
       try {
-        const url = incidentId
-          ? `/activity/${incidentId}`
-          : `/activity?limit=30`;
-        const response = await api.get(url);
+        const response = incidentId
+          ? await getIncidentActivity(incidentId)
+          : await getActivityFeed(30);
         setEvents(response.events || []);
       } catch (error) {
         console.error('Failed to fetch activity:', error);
@@ -38,15 +37,9 @@ export default function ActivityFeed({ incidentId }) {
       }
     };
 
-    socket.on(incidentId ? 'activity' : 'feed:update',
-      incidentId ? handleActivity : handleFeedUpdate);
-
-    // Join appropriate roomId) {
-      socket.emit('subscribe:incident', incidentId);
-    } else {
-      socket.emit('subscribe: 'activity' || !incidentId : 'feed:update',
-      incidentId ? handleActivity : handleFeedUpdate
-    );
+    const eventName = incidentId ? 'activity' : 'feed:update';
+    const handler = incidentId ? handleActivity : handleFeedUpdate;
+    socket.on(eventName, handler);
 
     // Join appropriate room
     if (incidentId) {
@@ -57,8 +50,7 @@ export default function ActivityFeed({ incidentId }) {
 
     // Cleanup
     return () => {
-      socket.off('activity', handleActivity);
-      socket.off('feed:update', handleFeedUpdate);
+      socket.off(eventName, handler);
     };
   }, [incidentId]);
 

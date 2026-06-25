@@ -1,6 +1,6 @@
 // frontend/components/ExecutiveDashboard.jsx
 import { useEffect, useState } from 'react';
-import api from '../api/client';
+import { getExecutiveMetrics } from '../lib/api';
 
 export default function ExecutiveDashboard() {
   const [metrics, setMetrics] = useState(null);
@@ -8,7 +8,7 @@ export default function ExecutiveDashboard() {
   useEffect(() => {
     const fetchMetrics = async () => {
       try {
-        const response = await api.get('/executive/metrics');
+        const response = await getExecutiveMetrics();
         setMetrics(response);
       } catch (error) {
         console.error('Failed to fetch executive metrics:', error);

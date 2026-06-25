@@ -9,6 +9,7 @@ export const Sidebar = ({ isOpen = false }) => {
     { path: '/incidents', label: 'Incidents', icon: 'security' },
     { path: '/analytics', label: 'Analytics', icon: 'analytics' },
     { path: '/runbooks', label: 'Runbooks', icon: 'menu_book' },
+    { path: '/submit', label: 'Submit Incident', icon: 'add_circle' },
     { path: '/settings', label: 'Settings', icon: 'settings' },
   ];
 
@@ -27,6 +28,7 @@ export const Sidebar = ({ isOpen = false }) => {
           <NavLink
             key={item.path}
             to={item.path}
+            end={item.path === '/'}
             className={({ isActive }) =>
               `${styles.navItem} ${isActive ? styles.active : ''}`
             }
@@ -38,11 +40,10 @@ export const Sidebar = ({ isOpen = false }) => {
       </div>
 
       <div className={styles.footer}>
-        <button className={styles.onCallBtn}>On-call Status</button>
         <div className={styles.footerLinks}>
-          <NavLink to="/support" className={styles.footerLink}>
-            <MaterialSymbol icon="help" />
-            <span>Support</span>
+          <NavLink to="/landing" className={styles.footerLink}>
+            <MaterialSymbol icon="open_in_new" />
+            <span>Landing Page</span>
           </NavLink>
           <NavLink to="/logout" className={styles.footerLink}>
             <MaterialSymbol icon="logout" />

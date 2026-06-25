@@ -72,10 +72,6 @@ export default function StatsBar({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold">Critical (P0)</h3>
-            <p className="text-xs opacity-60">Requires immediate attention</p>
-          </div>
-          <div>
-            <h3 className="font-semibold">Critical (P0)</h3>
             <p className="text-xs opacity-60">Highest severity</p>
           </div>
           <h2 className="text-2xl font-bold">{p0}</h2>

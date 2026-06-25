@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ingestAlert, triageAlert } from '../../lib/api';
 import { Button } from '../../components/common/Button';
 import { MaterialSymbol } from '../../components/common/MaterialSymbol';
 import styles from './SubmitIncident.module.css';
@@ -8,15 +9,25 @@ const SubmitIncident = () => {
   const [rawAlert, setRawAlert] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!rawAlert.trim()) return;
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError('');
+    try {
+      const result = await ingestAlert({ source, payload: rawAlert });
+      if (result.alertId) {
+        await triageAlert(result.alertId);
+      }
       setSuccess(true);
-      setTimeout(() => setSuccess(false), 2000);
-    }, 1500);
+      setTimeout(() => setSuccess(false), 3000);
+    } catch (err) {
+      setError(err.message || 'Failed to process incident');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleClear = () => {
@@ -83,16 +94,16 @@ const SubmitIncident = () => {
                   <div className={styles.spinner}></div>
                 </>
               ) : success ? (
-                'Triaged!'
+                '✓ Triaged'
               ) : (
                 'Analyze & Triage'
               )}
             </Button>
           </div>
         </form>
-      </div>
+      </div>          {error && <div className={styles.error}>{error}</div>}
 
-      <div className={styles.decor}></div>
+          <div className={styles.decor}></div>
     </div>
   );
 };

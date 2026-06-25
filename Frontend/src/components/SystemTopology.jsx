@@ -8,7 +8,7 @@ import ReactFlow, {
   Position
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import api from '../lib/api';
+import { getTopology } from '../lib/api';
 import './SystemTopology.css';
 
 // Custom Node Renderer
@@ -47,7 +47,7 @@ export default function SystemTopology() {
 
   const fetchTopology = useCallback(async () => {
     try {
-      const res = await api.getTopology();
+      const res = await getTopology();
 
       const mappedNodes = res.topology.nodes.map(node => {
         const hasIncident = res.impactedServices.includes(node.id);
@@ -62,8 +62,7 @@ export default function SystemTopology() {
         return {
           id: node.id,
           type: 'service',
-          position: { x: 0, y: 0 }, // React flow auto-layouts via dagre usually,
-                                     // but for hackathon we hardcode basic layout below
+          position: { x: 0, y: 0 },
           data: {
             ...node,
             icon: TYPE_ICONS[node.type] || '📦',

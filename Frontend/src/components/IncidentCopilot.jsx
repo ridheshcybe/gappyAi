@@ -1,6 +1,6 @@
 // frontend/components/IncidentCopilot.jsx
 import { useState, useRef, useEffect } from 'react';
-import api from '../api/client';
+import { copilotChat, getCopilotConversation } from '../lib/api';
 
 const SUGGESTIONS = [
   'Why is this P0?',
@@ -17,7 +17,7 @@ export default function IncidentCopilot({ incidentId }) {
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    api.get(`/copilot/conversation/${incidentId}`).then(r => setMessages(r.messages || []));
+    getCopilotConversation(incidentId).then(r => setMessages(r.messages || []));
   }, [incidentId]);
 
   useEffect(() => {
@@ -34,11 +34,7 @@ export default function IncidentCopilot({ incidentId }) {
     setLoading(true);
 
     try {
-      const res = await api.post('/copilot/chat', {
-        incidentId,
-        message: userMsg,
-        conversation: messages
-      });
+      const res = await copilotChat(incidentId, userMsg, messages);
       setMessages([...newMessages, { role: 'assistant', content: res.reply }]);
     } catch (err) {
       setMessages([...newMessages, {

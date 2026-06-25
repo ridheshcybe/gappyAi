@@ -14,8 +14,16 @@ import { prometheusWebhook } from './api/webhooks.js';
 
 const app = express();
 
-// Define allowed origins BEFORE using them in CORS
-const allowedOrigin = ['http://localhost:5173', 'http://localhost:3000'];
+// Build allowed origins from env + defaults
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
+  .split(',')
+  .map(s => s.trim())
+  .filter(Boolean);
+ALLOWED_ORIGINS.push(
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:4321',
+);
 
 // Start escalation service
 escalationService.start();
@@ -23,13 +31,18 @@ escalationService.start();
 app.use(express.json());
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin || allowedOrigin.indexOf(origin) !== -1) {
-      cb(null, true);
-    } else {
-      cb(new Error("Not allowed by CORS"));
-    }
-  }
+    // Allow requests with no origin (server-to-server, curl, etc.)
+    if (!origin) return cb(null, true);
+    // Check against allowed list
+    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    // Reject origins not in the allowed list
+    cb(new Error(`Origin "${origin}" not allowed by CORS`));
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  credentials: true,
 }));
+app.options('*', cors()); // Pre-flight handler for all routes
 app.use(express.urlencoded({ extended: true }));
 
 const httpServer = createServer(app);
