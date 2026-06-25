@@ -20,7 +20,7 @@
     "uuid": "^14.0.1"
   },
   "devDependencies": {
-    "vitest": "^2.0.5",
+    "vitest": "^3.2.6",
     "supertest": "^7.0.0"
   },
   "scripts": {
