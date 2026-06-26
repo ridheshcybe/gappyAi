@@ -46,7 +46,7 @@ describe('datastore (incidentStore)', () => {
 
   it('should query only incident-like objects', async () => {
     // Save an incident
-    await incidentStore.save('inc-query-1', sampleIncident);
+    await incidentStore.save('inc-query-1', { ...sampleIncident, incidentId: 'inc-query-1' });
     // Save non-incident data (activity log, config)
     await incidentStore.put('activity:inc-query-1', { events: [] });
     await incidentStore.put('config:team', { engineers: [] });

@@ -61,8 +61,7 @@ describe('MetricsService', () => {
 // ── Activity Service ──
 describe('ActivityService', () => {
   beforeEach(async () => {
-    const all = await incidentStore.query({});
-    for (const i of all) await incidentStore.delete(i.incidentId);
+    await incidentStore.clear();
   });
 
   it('should log and retrieve activity', async () => {
