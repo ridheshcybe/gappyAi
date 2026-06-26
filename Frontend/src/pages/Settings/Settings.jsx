@@ -9,7 +9,6 @@ const Settings = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [onCall, setOnCall] = useState(true);
   const [notifications, setNotifications] = useState({
-    slack: true,
     email: true,
     desktop: false,
   });
@@ -90,7 +89,6 @@ const Settings = () => {
                 <p>Select where you want to receive alerts for low-priority (P2/P3) updates.</p>
                 <div className={styles.checkboxGroup}>
                   {[
-                    { key: 'slack', label: 'Slack Direct Messages', desc: 'Instantly sent to @alex.mercer' },
                     { key: 'email', label: 'Email Summaries', desc: 'Sent to alex.m@secureops.internal' },
                     { key: 'desktop', label: 'Desktop Push Notifications', desc: 'Requires browser permission' },
                   ].map((item) => (
@@ -159,22 +157,6 @@ const Settings = () => {
               </div>
 
               <div className={styles.integrationGrid}>
-                <div className={styles.integrationCard}>
-                  <div className={styles.integrationHeader}>
-                    <div className={styles.integrationIcon}>#</div>
-                    <div className={styles.connectedBadge}>
-                      <MaterialSymbol icon="check_circle" />
-                      Connected
-                    </div>
-                  </div>
-                  <h4>Slack Workspace</h4>
-                  <p>Push alerts to channels and acknowledge incidents directly from chat.</p>
-                  <div className={styles.integrationFooter}>
-                    <span>ID: wrk_982...</span>
-                    <button className={styles.configureBtn}>Configure</button>
-                  </div>
-                </div>
-
                 <div className={styles.integrationCard}>
                   <div className={styles.integrationHeader}>
                     <div className={styles.integrationIcon}>

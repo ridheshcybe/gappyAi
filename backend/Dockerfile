@@ -3,9 +3,10 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy package files and install
+# Copy package files, patches, and install
 COPY package*.json ./
-RUN npm install --production
+COPY patches/ ./patches/
+RUN npm install
 
 # Copy source code
 COPY . .

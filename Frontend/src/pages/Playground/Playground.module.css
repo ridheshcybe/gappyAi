@@ -1,0 +1,110 @@
+.container {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-xl);
+}
+.title {
+  font-family: var(--font-headline);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+.subtitle {
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  margin-top: 4px;
+}
+
+.section {
+  margin-top: var(--spacing-xl);
+}
+.sectionTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 4px;
+}
+.sectionDesc {
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  margin-bottom: var(--spacing-md);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px;
+  text-align: center;
+  background-color: var(--surface-container);
+  border-radius: var(--radius-xl);
+  border: 1px dashed var(--outline-variant);
+}
+.emptyIcon {
+  font-size: 48px;
+  color: var(--outline-variant);
+  margin-bottom: 12px;
+}
+.empty p {
+  color: var(--on-surface-variant);
+  font-size: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background-color: var(--surface-container);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--outline-variant);
+  overflow: hidden;
+}
+.listItem {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: 12px var(--spacing-md);
+  border-bottom: 1px solid rgba(68, 70, 83, 0.15);
+  font-size: 13px;
+  color: var(--on-surface);
+}
+.listItem:last-child { border-bottom: none; }
+.listMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+.sevBadge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-default);
+}
+.sev0 { background: rgba(255, 107, 107, 0.15); color: #ff6b6b; }
+.sev1 { background: rgba(252, 163, 17, 0.15); color: #fca311; }
+.sev2 { background: rgba(76, 201, 240, 0.15); color: #4cc9f0; }
+.sev3 { background: rgba(143, 144, 158, 0.15); color: #8f909e; }
+
+.listId {
+  font-family: var(--font-code);
+  color: var(--on-surface-variant);
+}
+.listTitle {
+  flex: 1;
+}
+.listTime {
+  color: var(--on-surface-variant);
+  font-family: var(--font-code);
+  font-size: 12px;
+}

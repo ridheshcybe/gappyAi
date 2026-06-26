@@ -1,0 +1,199 @@
+.container {
+  max-width: 80rem;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-lg);
+}
+.title {
+  font-family: var(--font-headline);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 700;
+  color: var(--on-surface);
+}
+.subtitle {
+  font-size: 14px;
+  color: var(--on-surface-variant);
+  margin-top: 4px;
+}
+
+.actions {
+  display: flex;
+  gap: var(--spacing-sm);
+}
+.newBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  background-color: var(--btn-primary-bg);
+  color: #fff;
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+.newBtn:hover {
+  opacity: 0.9;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: var(--spacing-lg);
+}
+.filterBtn {
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--outline-variant);
+  background: transparent;
+  color: var(--on-surface-variant);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.filterBtn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.filterActive {
+  background-color: var(--primary-container);
+  border-color: var(--primary-container);
+  color: var(--on-primary-container);
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 64px;
+  color: var(--on-surface-variant);
+}
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--outline-variant);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 24px;
+  text-align: center;
+}
+.emptyIcon {
+  font-size: 48px;
+  color: var(--outline-variant);
+  margin-bottom: 16px;
+}
+.empty h3 {
+  color: var(--on-surface);
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+.empty p {
+  color: var(--on-surface-variant);
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+.emptyCta {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-md);
+  background-color: var(--surface-container);
+  border-radius: var(--radius-lg);
+  border: 1px solid transparent;
+  text-decoration: none;
+  transition: border-color 0.2s, transform 0.15s;
+}
+.card:hover {
+  border-color: var(--outline-variant);
+  transform: translateX(4px);
+}
+.cardLeft {
+  flex: 1;
+}
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: 6px;
+}
+.badge {
+  font-family: var(--font-label);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: var(--radius-default);
+  text-transform: uppercase;
+}
+.badge.p0 { background-color: rgba(255, 107, 107, 0.15); color: #ff6b6b; }
+.badge.p1 { background-color: rgba(252, 163, 17, 0.15); color: #fca311; }
+.badge.p2 { background-color: rgba(76, 201, 240, 0.15); color: #4cc9f0; }
+.badge.p3 { background-color: rgba(143, 144, 158, 0.15); color: #8f909e; }
+
+.cardId {
+  font-family: var(--font-code);
+  font-size: 12px;
+  color: var(--on-surface-variant);
+}
+.confidence {
+  font-size: 12px;
+  color: var(--tertiary);
+}
+.cardTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--on-surface);
+  margin-bottom: 4px;
+}
+.cardComponent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+.cardImpact {
+  font-size: 13px;
+  color: var(--on-surface-variant);
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.cardRight {
+  color: var(--on-surface-variant);
+  margin-left: var(--spacing-md);
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

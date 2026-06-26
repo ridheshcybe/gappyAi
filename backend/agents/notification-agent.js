@@ -1,5 +1,5 @@
 // backend/agents/notification-agent.js
-import { lemmaClient } from '../lemma-config.js';
+import { chatCompletion } from '../lib/openrouter.js';
 
 const PROMPT_TEMPLATE = `
 Format an incident notification for {channel}.
@@ -12,7 +12,6 @@ Incident:
 - Runbook Summary: {runbookSummary}
 
 Adapt tone/length for channel:
-- slack: concise, emoji severity prefix, action-oriented
 - pagerduty: technical, includes triage hints
 - email: detailed, includes context and next steps
 
@@ -37,12 +36,12 @@ class NotificationAgent {
       .replace('{component}', incident.classification?.affectedComponent || 'unknown')
       .replace('{runbookSummary}', runbook?.summary || 'N/A');
 
-    // Use lemmaClient for the completion
-    const response = await lemmaClient.agents.chat({
-      agentId: 'notification_formatter_agent',
-      message: prompt,
-      system: 'You format incident notifications. Always valid JSON.',
-      model: 'gpt-4o-mini',
+    const response = await chatCompletion({
+      model: 'openai/gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You format incident notifications. Always valid JSON.' },
+        { role: 'user', content: prompt },
+      ],
       temperature: 0.4,
     });
 

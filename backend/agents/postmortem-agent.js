@@ -1,5 +1,5 @@
 // backend/agents/postmortem-agent.js
-import { lemmaClient } from '../lemma-config.js';
+import { chatCompletion } from '../lib/openrouter.js';
 import copilotContext from '../services/copilot-context.js';
 
 const SYSTEM = `You generate professional incident post-mortems (RCAs).
@@ -29,11 +29,12 @@ class PostMortemAgent {
     const contextBlock = copilotContext.formatForLLM(ctx);
     const prompt = PROMPT.replace('{context}', contextBlock);
 
-    const response = await lemmaClient.agents.chat({
-      agentId: 'postmortem_agent',
-      message: prompt,
-      system: SYSTEM,
-      model: 'gpt-4o-mini',
+    const response = await chatCompletion({
+      model: 'openai/gpt-4o-mini',
+      messages: [
+        { role: 'system', content: SYSTEM },
+        { role: 'user', content: prompt },
+      ],
       temperature: 0.3,
     });
 

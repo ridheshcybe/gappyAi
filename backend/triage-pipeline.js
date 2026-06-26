@@ -3,11 +3,11 @@ import docStore from "./stores/document-store.js";
 import incidentStore from "./stores/datastore.js";
 import router from "./alert-router.js";
 import { isValidIncident } from "./schemas/validator.js";
-import { emitIncident } from "./socket.js";
+import { emitIncident, emitTriageProgress } from "./socket.js";
 import { v4 as uuidv4 } from "uuid";
 import rootCauseAgent from "./agents/root-cause-agent.js";
 import runbookAgent from "./agents/runbook-agent.js";
-import notificationAgent from "./agents/notification-agent.js";
+
 import historyService from "./services/history-service.js";
 import activityService from "./services/activity-service.js";
 
@@ -16,6 +16,15 @@ export async function triageIncident(alertId) {
     `📥 Processing ${alertId}`
   );
 
+  try {
+    return await runPipeline(alertId);
+  } catch (err) {
+    emitTriageProgress(alertId, "error", 0, `Triage failed: ${err.message}`);
+    throw err;
+  }
+}
+
+async function runPipeline(alertId) {
   const raw = await docStore.fetch(
     alertId
   );
@@ -38,6 +47,8 @@ export async function triageIncident(alertId) {
   };
 
   addTimelineEvent("Alert Received");
+
+  emitTriageProgress(alertId, "triage", 10, "Starting AI triage analysis…");
 
   // Stage 1: AI Triage
   const triageResult =
@@ -63,14 +74,17 @@ export async function triageIncident(alertId) {
   }
 
   addTimelineEvent("AI Triage Complete");
+  emitTriageProgress(alertId, "root-cause", 35, "AI triage complete. Analyzing root cause…");
 
   // Stage 2: Root Cause Analysis
   const rootCause = await rootCauseAgent.analyze(triaged);
   addTimelineEvent("Root Cause Analysis Complete");
+  emitTriageProgress(alertId, "runbook", 55, "Root cause identified. Generating remediation runbook…");
 
   // Stage 3: Runbook Generation
   const runbook = await runbookAgent.generate(triaged, rootCause);
   addTimelineEvent("Runbook Generated");
+  emitTriageProgress(alertId, "validate", 75, "Runbook ready. Validating incident schema…");
 
   // Stage 4: Build structured incident matching the schema
   const incident = {
@@ -114,12 +128,14 @@ export async function triageIncident(alertId) {
     );
 
   if (!valid) {
+    emitTriageProgress(alertId, "error", 0, "Incident schema validation failed");
     throw new Error(
       "Incident schema invalid"
     );
   }
 
   addTimelineEvent("Validated");
+  emitTriageProgress(alertId, "store", 82, "Incident validated. Storing…");
 
   // Stage 6: Persist
   await incidentStore.save(
@@ -127,6 +143,7 @@ export async function triageIncident(alertId) {
     incident
   );
   addTimelineEvent("Stored");
+  emitTriageProgress(alertId, "history", 88, "Incident stored. Linking historical context…");
 
   // Stage 6b: Historical similarity
   const similar = await historyService.findSimilar(incident, 5);
@@ -137,6 +154,7 @@ export async function triageIncident(alertId) {
     incident
   );
   addTimelineEvent("History Linked");
+  emitTriageProgress(alertId, "route", 94, "History linked. Routing to appropriate team…");
 
   // Index for future lookups (fire and forget after resolution)
   // Or index immediately for live similarity:
@@ -144,26 +162,13 @@ export async function triageIncident(alertId) {
     console.error('History indexing failed:', err)
   );
 
-  // Stage 7: Notification (async, non-blocking)
-  notificationAgent.format(incident, rootCause, runbook, 'slack')
-    .then(notification => {
-      // Update incident with notification
-      incident.notification = notification;
-      return incidentStore.save(
-        incident.incidentId,
-        incident
-      );
-    })
-    .catch(err => console.error('Notification failed:', err));
-  // Note: We don't await this to keep it non-blocking
-  addTimelineEvent("Notification Queued");
-
-  // Stage 8: Severity routing
+  // Stage 7: Severity routing
   const routingResult =
     await router.routeIncident(
       incident
     );
   addTimelineEvent("Routed");
+  emitTriageProgress(alertId, "finalize", 97, "Routing complete. Finalizing incident…");
 
   // Final update with completed timeline
   await incidentStore.save(
@@ -173,6 +178,7 @@ export async function triageIncident(alertId) {
 
   // Emit via WebSocket
   emitIncident(incident);
+  emitTriageProgress(alertId, "complete", 100, "Triage complete!");
 
   return {
     incident,

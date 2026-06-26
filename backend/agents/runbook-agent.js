@@ -1,5 +1,5 @@
 // backend/agents/runbook-agent.js
-import { lemmaClient } from '../lemma-config.js';
+import { chatCompletion } from '../lib/openrouter.js';
 import RootCauseAgent from './root-cause-agent.js';
 
 const PROMPT_TEMPLATE = `
@@ -38,12 +38,12 @@ class RunbookAgent {
       .replace('{rootCause}', rootCause?.rootCause || 'unknown')
       .replace('{affectedComponents}', (rootCause?.affectedComponents || []).join(', '));
 
-    // Use lemmaClient for the completion
-    const response = await lemmaClient.agents.chat({
-      agentId: 'runbook_agent',
-      message: prompt,
-      system: 'You are an SRE runbook generator. Always valid JSON. Commands must be safe and copy-pasteable.',
-      model: 'gpt-4o-mini',
+    const response = await chatCompletion({
+      model: 'openai/gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You are an SRE runbook generator. Always valid JSON. Commands must be safe and copy-pasteable.' },
+        { role: 'user', content: prompt },
+      ],
       temperature: 0.3,
     });
 

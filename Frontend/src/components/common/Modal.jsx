@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import styles from './Modal.module.css';
 
-export const Modal = ({ isOpen, onClose, children, className = '' }) => {
+export const Modal = ({ isOpen, onClose, children }) => {
     useEffect(() => {
         const handleEscape = (e) => {
             if (e.key === 'Escape' && isOpen) onClose();

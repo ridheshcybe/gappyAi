@@ -14,7 +14,7 @@ import { prometheusWebhook } from './api/webhooks.js';
 
 const app = express();
 
-// Build allowed origins from env + defaults
+// ── Build allowed origins from env + defaults ──
 const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
   .split(',')
   .map(s => s.trim())
@@ -28,22 +28,51 @@ ALLOWED_ORIGINS.push(
 // Start escalation service
 escalationService.start();
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
+
+// ── CORS must run BEFORE auth so CORS headers are set on every response ──
 app.use(cors({
   origin: (origin, cb) => {
-    // Allow requests with no origin (server-to-server, curl, etc.)
     if (!origin) return cb(null, true);
-    // Check against allowed list
     if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-    // Reject origins not in the allowed list
+    // Allow any localhost origin in development
+    const cleanOrigin = origin.replace(/\/+$/, '');
+    if (/^https?:\/\/localhost(:\d+)?$/.test(cleanOrigin)) return cb(null, true);
     cb(new Error(`Origin "${origin}" not allowed by CORS`));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],
   credentials: true,
 }));
-app.options('*', cors()); // Pre-flight handler for all routes
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false, limit: '1mb' }));
+
+// ── Security Headers ──
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '0');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  next();
+});
+
+// ── API Key Authentication (runs AFTER CORS so auth errors get CORS headers) ──
+const API_KEY = process.env.API_KEY || '';
+
+function requireAuth(req, res, next) {
+  // Skip auth for health check (used by load balancers)
+  if (req.path === '/api/health') return next();
+  // Skip auth for GET read-only endpoints
+  if (req.method === 'GET') return next();
+  // Require valid API key for all write operations
+  const provided = req.headers['x-api-key'];
+  if (API_KEY && provided !== API_KEY) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
+}
+
+app.use(requireAuth);
 
 const httpServer = createServer(app);
 const io = initializeSocket(httpServer);
@@ -141,6 +170,15 @@ app.get("/api/health", (req, res) => {
     status: "healthy",
     service: "SecureOps Sync",
     timestamp: new Date().toISOString(),
+  });
+});
+
+// ── Global Error Handler (sanitizes internal details) ──
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err);
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error: status >= 500 ? 'Internal server error' : err.message
   });
 });
 

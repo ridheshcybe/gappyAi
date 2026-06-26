@@ -1,13 +1,18 @@
+const OPENROUTER_BASE = "https://openrouter.ai/api/v1";
+
 let _openai = null;
 
 async function getOpenAI() {
   if (_openai) return _openai;
-  if (!process.env.OPENAI_API_KEY) {
-    console.warn("⚠️ OPENAI_API_KEY not set — embeddings will return mock vectors");
+  if (!process.env.OPENROUTER_API_KEY) {
+    console.warn("⚠️ OPENROUTER_API_KEY not set — embeddings will return mock vectors");
     return null;
   }
   const { default: OpenAI } = await import("openai");
-  _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  _openai = new OpenAI({
+    baseURL: OPENROUTER_BASE,
+    apiKey: process.env.OPENROUTER_API_KEY,
+  });
   return _openai;
 }
 
@@ -29,7 +34,7 @@ class EmbeddingService {
     }
 
     const response = await client.embeddings.create({
-      model: "text-embedding-3-small",
+      model: "openai/text-embedding-3-small",
       input: normalized,
     });
 

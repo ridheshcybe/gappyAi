@@ -17,7 +17,6 @@ export async function copilotChat(req, res) {
 
 export async function getConversation(req, res) {
   try {
-    const { copilotAgent } = await import('../agents/copilot-agent.js');
     const messages = await copilotAgent.getConversation(req.params.incidentId);
     res.json({ messages });
   } catch (err) {

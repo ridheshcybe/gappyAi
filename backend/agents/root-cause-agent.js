@@ -1,5 +1,5 @@
 // backend/agents/root-cause-agent.js
-import { lemmaClient } from '../lemma-config.js';
+import { chatCompletion } from '../lib/openrouter.js';
 
 const PROMPT_TEMPLATE = `
 You are a Site Reliability Engineer performing root cause analysis.
@@ -31,11 +31,12 @@ class RootCauseAgent {
       .replace('{component}', triaged.affectedComponent || 'unknown')
       .replace('{errorCategory}', triaged.errorCategory || 'unknown');
 
-    const response = await lemmaClient.agents.chat({
-      agentId: 'root_cause_analyzer_agent',
-      message: prompt,
-      system: 'You are an expert SRE. Always respond with valid JSON only.',
-      model: 'gpt-4o-mini',
+    const response = await chatCompletion({
+      model: 'openai/gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You are an expert SRE. Always respond with valid JSON only.' },
+        { role: 'user', content: prompt },
+      ],
       temperature: 0.2,
     });
 

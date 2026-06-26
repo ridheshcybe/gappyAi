@@ -1,7 +1,17 @@
 // frontend/src/lib/api.js
+// Default matches backend's fallback port (index.js: PORT = process.env.PORT || 4321)
+// Override via VITE_API_URL env var for production / Docker
 const API_URL =
   import.meta.env.VITE_API_URL ||
-  "http://localhost:3000";
+  "http://localhost:4321";
+
+async function handleResponse(res) {
+  const data = await res.json();
+  if (!res.ok || data.success === false) {
+    throw new Error(data.error || `Request failed with status ${res.status}`);
+  }
+  return data;
+}
 
 export async function ingestAlert(
   data
@@ -20,7 +30,7 @@ export async function ingestAlert(
     }
   );
 
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function triageAlert(
@@ -33,7 +43,7 @@ export async function triageAlert(
     }
   );
 
-  return res.json();
+  return handleResponse(res);
 }
 
 export async function getIncidents() {

@@ -8,14 +8,12 @@ export default function IncidentDetails({
   if (!incident)
     return null;
 
+  const showTimeline = incident.timeline && incident.timeline.length > 0;
+
   return (
     <div className="fixed right-0 top-0 h-screen w-96 bg-neutral-950 p-6 overflow-y-auto">
       <h2 className="font-bold text-xl">
-        {
-          incident
-            .triageAnalysis
-            .headline
-        }
+        {incident.triageAnalysis?.headline}
       </h2>
 
       {/* Incident Copilot */}
@@ -24,19 +22,13 @@ export default function IncidentDetails({
       {/* Activity Feed */}
       <ActivityFeed incidentId={incident.incidentId || incident.id} />
 
-      <p className="mt-4">
-        Root Cause:
-      </p>
+      <p className="mt-4">Root Cause:</p>
 
       <p className="opacity-80">
-        {
-          incident
-            .triageAnalysis
-            .rootCauseInferred
-        }
+        {incident.triageAnalysis?.rootCauseInferred}
       </p>
 
-      {incident.timeline && incident.timeline.length > 0 ? (
+      {showTimeline && (
         <div className="mt-6">
           <h3 className="font-bold text-lg">Timeline</h3>
           <div className="mt-3 space-y-2">
@@ -47,28 +39,15 @@ export default function IncidentDetails({
               </div>
             ))}
           </div>
-        )
-      ) : null}
+        </div>
+      )}
 
-      <h3 className="mt-6 font-bold">
-        Runbook
-      </h3>
+      <h3 className="mt-6 font-bold">Runbook</h3>
 
       <ul className="mt-3">
-        {incident
-          .remediationRunbook
-          .suggestedSteps.map(
-            (
-              step,
-              idx
-            ) => (
-              <li
-                key={idx}
-              >
-                • {step}
-              </li>
-            )
-          )}
+        {incident.remediationRunbook?.suggestedSteps.map((step, idx) => (
+          <li key={idx}>• {step}</li>
+        ))}
       </ul>
     </div>
   );

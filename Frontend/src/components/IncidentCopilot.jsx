@@ -36,7 +36,7 @@ export default function IncidentCopilot({ incidentId }) {
     try {
       const res = await copilotChat(incidentId, userMsg, messages);
       setMessages([...newMessages, { role: 'assistant', content: res.reply }]);
-    } catch (err) {
+    } catch {
       setMessages([...newMessages, {
         role: 'assistant',
         content: '⚠️ Copilot unavailable. Retry.'

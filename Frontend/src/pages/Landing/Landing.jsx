@@ -114,8 +114,8 @@ const Landing = () => {
             <div>
               <h3>Synchronizes the Team</h3>
               <p>
-                Bi-directional sync with Slack and Teams ensures everyone is looking
-                at the same data, no matter where they are working from.
+                Real-time incident state sync ensures everyone is looking at the
+                same data, no matter where they are working from.
               </p>
             </div>
           </div>

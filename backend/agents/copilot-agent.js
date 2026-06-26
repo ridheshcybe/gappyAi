@@ -1,5 +1,5 @@
 // backend/agents/copilot-agent.js
-import { lemmaClient } from '../lemma-config.js';
+import { chatCompletion, isConfigured } from '../lib/openrouter.js';
 import copilotContext from '../services/copilot-context.js';
 import incidentStore from '../stores/datastore.js';
 import remediationService from '../services/remediation-service.js';
@@ -25,6 +25,23 @@ Rules:
 - If an action is risky, ask for confirmation first (e.g., "Are you sure you want me to restart the DB?").`;
 
 class CopilotAgent {
+  async _chat(messages) {
+    if (!isConfigured()) {
+      return {
+        content: "I'm running in development mode without an AI backend. Please set `OPENROUTER_API_KEY` to enable the copilot. In the meantime, here's what I can tell you:\n\n- Check the incident classification and runbook details above\n- Review the timeline for key events\n- The remediation steps are listed in the runbook section"
+      };
+    }
+
+    const response = await chatCompletion({
+      model: "openai/gpt-4o-mini",
+      messages,
+      temperature: 0.2,
+      maxTokens: 1024,
+    });
+
+    return response;
+  }
+
   async chat({ incidentId, message, conversation = [] }) {
     const ctx = await copilotContext.build(incidentId);
     const contextBlock = copilotContext.formatForLLM(ctx);
@@ -36,14 +53,7 @@ class CopilotAgent {
       { role: 'user', content: message }
     ];
 
-    // Use lemmaClient for the chat completion
-    const response = await lemmaClient.agents.chat({
-      agentId: 'secureops_copilot_agent',
-      messages: messages,
-      model: 'gpt-4o-mini',
-      temperature: 0.2,
-    });
-
+    const response = await this._chat(messages);
     const content = response.content;
 
     // Check if AI decided to use a tool
@@ -54,26 +64,19 @@ class CopilotAgent {
         const toolData = JSON.parse(toolMatch[0]);
 
         if (toolData.tool_call) {
-          // Execute the tool!
           const result = await remediationService.executeAction(
             incidentId,
             toolData.tool,
             toolData.args || {}
           );
 
-          // Feed the result back to the AI so it can summarize what it did
           const followUpMessages = [
             ...messages,
             { role: 'assistant', content: content },
             { role: 'system', content: `Tool Execution Result: ${result.log}` }
           ];
 
-          const finalResponse = await lemmaClient.agents.chat({
-            agentId: 'secureops_copilot_agent',
-            messages: followUpMessages,
-            model: 'gpt-4o-mini',
-            temperature: 0.2,
-          });
+          const finalResponse = await this._chat(followUpMessages);
 
           await this.persistConversation(incidentId, message, finalResponse.content);
           return {
@@ -84,11 +87,9 @@ class CopilotAgent {
         }
       } catch (e) {
         console.error("Tool parsing failed", e);
-        // Fall through to normal response if JSON parsing fails
       }
     }
 
-    // Normal text response
     await this.persistConversation(incidentId, message, content);
     return {
       reply: content,

@@ -56,7 +56,12 @@
   appearance: none;
   cursor: pointer;
   font-size: 14px;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
+}
+.selectDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 .select:focus {
   outline: none;
@@ -101,12 +106,16 @@
   font-size: 13px;
   line-height: 20px;
   resize: vertical;
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, opacity 0.2s;
 }
 .textarea:focus {
   outline: none;
   border-color: var(--primary);
   box-shadow: 0 0 10px rgba(102, 126, 234, 0.2);
+}
+.textareaDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .actions {
@@ -128,15 +137,6 @@
   opacity: 0.8;
   cursor: not-allowed;
 }
-.spinner {
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
-}
-
 .error {
   margin-top: var(--spacing-md);
   padding: var(--spacing-sm) var(--spacing-md);
@@ -145,6 +145,9 @@
   border-radius: var(--radius-lg);
   color: #ff6b6b;
   font-size: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
 }
 
 .decor {
@@ -158,4 +161,125 @@
   filter: blur(120px);
   pointer-events: none;
   z-index: -1;
+}
+
+/* ── Progress Section ── */
+
+.progressSection {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background-color: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.25);
+  border-radius: var(--radius-xl);
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.progressBar {
+  position: relative;
+  height: 8px;
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: var(--spacing-sm);
+}
+
+.progressFill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 99px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  min-width: 4px;
+}
+
+.progressPct {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--font-label);
+  color: var(--on-surface);
+  letter-spacing: 0.05em;
+}
+
+.progressMessage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+  margin: 0 0 var(--spacing-md) 0;
+}
+
+.progressIcon {
+  font-size: 16px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
+}
+
+.stagesRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stageChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-label);
+  letter-spacing: 0.03em;
+  transition: all 0.3s ease;
+}
+
+.stagePending {
+  background-color: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.stageActive {
+  background-color: rgba(102, 126, 234, 0.15);
+  color: #b9c3ff;
+  border: 1px solid rgba(102, 126, 234, 0.35);
+  box-shadow: 0 0 12px rgba(102, 126, 234, 0.15);
+}
+
+.stageDone {
+  background-color: rgba(80, 200, 120, 0.12);
+  color: #50c878;
+  border: 1px solid rgba(80, 200, 120, 0.3);
+}
+
+.stageIcon {
+  font-size: 14px;
+}
+
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.errorIcon {
+  vertical-align: middle;
+  margin-right: 6px;
+  font-size: 18px;
+  color: #ff6b6b;
 }

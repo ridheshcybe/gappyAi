@@ -1,5 +1,5 @@
 // backend/agents/assignment-agent.js
-import { lemmaClient } from '../lemma-config.js';
+import { chatCompletion } from '../lib/openrouter.js';
 import incidentStore from '../stores/datastore.js';
 
 const PROMPT = `
@@ -36,11 +36,12 @@ class AssignmentAgent {
       .replace('{engineers}', JSON.stringify(engineers, null, 2))
       .replace('{history}', JSON.stringify(history));
 
-    const response = await lemmaClient.agents.chat({
-      agentId: 'assignment_agent',
-      message: prompt,
-      system: 'You are an on-call routing AI. Always valid JSON.',
-      model: 'gpt-4o-mini',
+    const response = await chatCompletion({
+      model: 'openai/gpt-4o-mini',
+      messages: [
+        { role: 'system', content: 'You are an on-call routing AI. Always valid JSON.' },
+        { role: 'user', content: prompt },
+      ],
       temperature: 0.2,
     });
 
