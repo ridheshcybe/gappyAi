@@ -41,10 +41,21 @@ class TopologyService {
       ];
 
       services.forEach(s => {
-        if (s && TOPOLOGY.nodes.find(n => n.id === s)) {
-          impactedServices.add(s);
-          if (!incidentMap[s]) incidentMap[s] = [];
-          incidentMap[s].push({
+        if (!s) return;
+        // Match against node IDs: check exact match, label match, or word-match
+        const normalizedService = s;
+        const serviceWords = normalizedService.split(/[\s-]+/);
+        const matchedNode = TOPOLOGY.nodes.find(n => {
+          const nodeId = n.id.toLowerCase();
+          return n.id === normalizedService ||
+                 n.label.toLowerCase() === normalizedService ||
+                 n.label.toLowerCase().includes(normalizedService) ||
+                 serviceWords.includes(nodeId);
+        });
+        if (matchedNode) {
+          impactedServices.add(matchedNode.id);
+          if (!incidentMap[matchedNode.id]) incidentMap[matchedNode.id] = [];
+          incidentMap[matchedNode.id].push({
             id: inc.incidentId || inc.id,
             title: inc.triageAnalysis?.headline || inc.title,
             severity: inc.classification?.severity || inc.severity

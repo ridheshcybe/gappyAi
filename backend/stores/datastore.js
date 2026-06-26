@@ -55,6 +55,14 @@ const incidentStore = {
   put(key, data) {
     store.set(key, data);
     return Promise.resolve(data);
+  },
+
+  /** Clear all data (used in tests) */
+  clear() {
+    store.clear();
+    // Re-add schema
+    store.set('__schema__', incidentSchema);
+    return Promise.resolve();
   }
 };
 

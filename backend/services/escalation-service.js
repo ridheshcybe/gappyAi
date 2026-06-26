@@ -62,14 +62,14 @@ class EscalationService {
     await incidentStore.save(incidentId, incident);
 
     await activityService.log(incidentId, 'severity_changed', 'auto-escalation', {
-      from: old, to: newSeverity, reason: 'timeout'
+      from: old, to: newFullSeverity, reason: 'timeout'
     });
 
     const io = global.app?.get('io');
     io?.to(`incident:${incidentId}`).emit('incident:update', incident);
-    io?.emit('escalation', { incidentId, from: old, to: newSeverity });
+    io?.emit('escalation', { incidentId, from: old, to: newFullSeverity });
 
-    console.log(`⬆️ Escalated ${incidentId}: ${old} → ${newSeverity}`);
+    console.log(`⬆️ Escalated ${incidentId}: ${old} → ${newFullSeverity}`);
   }
 }
 

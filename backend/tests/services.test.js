@@ -21,9 +21,7 @@ function seedIncidents() {
 // ── Metrics Service ──
 describe('MetricsService', () => {
   beforeEach(async () => {
-    // Clear store
-    const all = await incidentStore.query({});
-    for (const i of all) await incidentStore.delete(i.incidentId);
+    await incidentStore.clear();
   });
 
   it('should compute empty metrics when no incidents', async () => {

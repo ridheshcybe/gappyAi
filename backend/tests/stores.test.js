@@ -32,13 +32,6 @@ describe('datastore (incidentStore)', () => {
     timestamp: new Date().toISOString(),
     status: 'open',
   };
-    incidentId: 'inc-001',
-    classification: { severity: 'P0_CRITICAL', affectedComponent: 'API', errorCategory: 'Timeout' },
-    triageAnalysis: { headline: 'Test', rootCauseInferred: 'x', userImpactDescription: 'y' },
-    remediationRunbook: { status: 'open', suggestedSteps: [], draftedNotification: '' },
-    timestamp: new Date().toISOString(),
-    status: 'open',
-  };
 
   it('should save and fetch an incident', async () => {
     await incidentStore.save('inc-001', sampleIncident);
