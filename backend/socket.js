@@ -23,6 +23,11 @@ function getCorsOrigin() {
     // Allow any localhost origin in development (handle trailing slash too)
     const cleanOrigin = origin.replace(/\/+$/, '');
     if (/^https?:\/\/localhost(:\d+)?$/.test(cleanOrigin)) return callback(null, true);
+    // Allow Render production domains
+    try {
+      const url = new URL(cleanOrigin);
+      if (url.hostname.endsWith('.onrender.com')) return callback(null, true);
+    } catch {}
     callback(new Error('Not allowed by CORS'));
   };
 }

@@ -38,6 +38,11 @@ app.use(cors({
     // Allow any localhost origin in development
     const cleanOrigin = origin.replace(/\/+$/, '');
     if (/^https?:\/\/localhost(:\d+)?$/.test(cleanOrigin)) return cb(null, true);
+    // Allow Render production domains
+    try {
+      const url = new URL(cleanOrigin);
+      if (url.hostname.endsWith('.onrender.com')) return cb(null, true);
+    } catch {}
     cb(new Error(`Origin "${origin}" not allowed by CORS`));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
