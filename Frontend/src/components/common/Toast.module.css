@@ -1,0 +1,125 @@
+.container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 100000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  max-width: 400px;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #1e1f2e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  pointer-events: auto;
+  cursor: pointer;
+  animation: toastIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.toastExit {
+  opacity: 0;
+  transform: translateX(30px);
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Type variants */
+.success {
+  border-color: rgba(52, 211, 153, 0.25);
+  background: linear-gradient(135deg, #1a2e2a, #1e1f2e);
+}
+
+.error {
+  border-color: rgba(255, 107, 107, 0.25);
+  background: linear-gradient(135deg, #2e1a1a, #1e1f2e);
+}
+
+.info {
+  border-color: rgba(120, 140, 255, 0.2);
+  background: linear-gradient(135deg, #1a1e2e, #1e1f2e);
+}
+
+.warning {
+  border-color: rgba(252, 163, 17, 0.25);
+  background: linear-gradient(135deg, #2e2a1a, #1e1f2e);
+}
+
+/* Icon */
+.toastIcon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.success .toastIcon {
+  color: #34d399;
+}
+
+.error .toastIcon {
+  color: #ff6b6b;
+}
+
+.info .toastIcon {
+  color: #788cff;
+}
+
+.warning .toastIcon {
+  color: #fca311;
+}
+
+.toastMessage {
+  flex: 1;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #d0d0e0;
+  font-weight: 500;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.2);
+  padding: 2px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+  flex-shrink: 0;
+}
+
+.closeBtn:hover {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.closeBtn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .container {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    max-width: none;
+  }
+}

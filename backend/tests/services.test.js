@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import incidentStore from '../stores/datastore.js';
 
 // Services use incidentStore directly, so we seed data before each test
-function seedIncidents() {
+async function seedIncidents() {
   const base = {
     classification: { severity: 'P0_CRITICAL', affectedComponent: 'API Gateway', errorCategory: 'Timeout' },
     triageAnalysis: { headline: 'Test', rootCauseInferred: 'x', userImpactDescription: 'y' },
@@ -14,7 +14,7 @@ function seedIncidents() {
     { ...base, incidentId: 'inc-2', status: 'open', createdAt: new Date(Date.now() - 5 * 60000).toISOString(), severity: 'P1_HIGH' },
     { ...base, incidentId: 'inc-3', status: 'resolved', createdAt: new Date(Date.now() - 60 * 60000).toISOString(), resolutionTimeMin: 15, severity: 'P2_MEDIUM' },
   ];
-  incidents.forEach(i => incidentStore.save(i.incidentId, i));
+  await Promise.all(incidents.map(i => incidentStore.save(i.incidentId, i)));
   return incidents;
 }
 
@@ -33,7 +33,7 @@ describe('MetricsService', () => {
   });
 
   it('should count incidents by severity', async () => {
-    seedIncidents();
+    await seedIncidents();
     const metricsService = (await import('../services/metrics-service.js')).default;
     const result = await metricsService.compute();
     expect(result.totalIncidents).toBe(3);
@@ -42,7 +42,7 @@ describe('MetricsService', () => {
   });
 
   it('should compute trend data', async () => {
-    seedIncidents();
+    await seedIncidents();
     const metricsService = (await import('../services/metrics-service.js')).default;
     const result = await metricsService.compute();
     expect(result.trend7d).toHaveLength(7);
@@ -50,7 +50,7 @@ describe('MetricsService', () => {
   });
 
   it('should compute reliability score', async () => {
-    seedIncidents();
+    await seedIncidents();
     const metricsService = (await import('../services/metrics-service.js')).default;
     const result = await metricsService.compute();
     expect(result.reliabilityScore).toBeGreaterThanOrEqual(0);

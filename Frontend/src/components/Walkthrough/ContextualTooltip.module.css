@@ -1,0 +1,76 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: help;
+  vertical-align: middle;
+  outline: none;
+}
+
+.wrapper:focus-visible .badge {
+  box-shadow: 0 0 0 2px rgba(120, 140, 255, 0.5);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(120, 140, 255, 0.1);
+  border: 1px solid rgba(120, 140, 255, 0.2);
+  color: rgba(120, 140, 255, 0.6);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+  flex-shrink: 0;
+}
+
+.badge svg {
+  display: block;
+}
+
+.wrapper:hover .badge,
+.wrapper:focus .badge {
+  background: rgba(120, 140, 255, 0.2);
+  color: rgba(120, 140, 255, 0.9);
+  border-color: rgba(120, 140, 255, 0.4);
+}
+
+/* ─── Tooltip Portal ─── */
+.tooltipPortal {
+  position: fixed;
+  z-index: 100000;
+  width: 220px;
+  padding: 10px 12px;
+  background: #1e1f2e;
+  border: 1px solid rgba(120, 140, 255, 0.15);
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: tooltipFadeIn 0.15s ease-out;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tooltipTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #d0d0e0;
+  margin-bottom: 4px;
+}
+
+.tooltipBody {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #9090a8;
+}

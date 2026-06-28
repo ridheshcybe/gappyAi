@@ -18,6 +18,7 @@ export default {
         "slack",
         "log",
         "webhook",
+        "chaos-panel",
       ],
     },
 

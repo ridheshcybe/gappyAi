@@ -2,33 +2,22 @@
 let io;
 
 import { Server } from "socket.io";
+import { isOriginAllowed } from "./lib/cors-utils.js";
 
 function getCorsOrigin() {
   const explicitOrigins = (process.env.CORS_ORIGINS || '')
     .split(',')
     .map(s => s.trim())
     .filter(Boolean);
-  const hardcoded = [
+  const all = [
+    ...explicitOrigins,
     'http://localhost:5173',
     'http://localhost:3000',
     'http://localhost:4321',
   ];
-  const all = [...explicitOrigins, ...hardcoded];
 
   return (origin, callback) => {
-    // Allow requests with no origin (server-to-server, curl, etc.)
-    if (!origin) return callback(null, true);
-    // Exact match against explicit + hardcoded origins
-    if (all.includes(origin)) return callback(null, true);
-    // Allow any localhost origin in development (handle trailing slash too)
-    const cleanOrigin = origin.replace(/\/+$/, '');
-    if (/^https?:\/\/localhost(:\d+)?$/.test(cleanOrigin)) return callback(null, true);
-    // Allow Render production domains
-    try {
-      const url = new URL(cleanOrigin);
-      if (url.hostname.endsWith('.onrender.com')) return callback(null, true);
-    } catch {}
-    callback(new Error('Not allowed by CORS'));
+    callback(null, isOriginAllowed(origin, all));
   };
 }
 

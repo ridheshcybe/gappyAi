@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { initLemma } from './lemma-config.js';
+import { isOriginAllowed } from './lib/cors-utils.js';
 dotenv.config();
 
 import { ingestAlert } from "./input-handler.js";
@@ -15,15 +16,16 @@ import { prometheusWebhook } from './api/webhooks.js';
 const app = express();
 
 // ── Build allowed origins from env + defaults ──
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || '')
+const CORS_ORIGINS = (process.env.CORS_ORIGINS || '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
-ALLOWED_ORIGINS.push(
+const ALLOWED_ORIGINS = [
+  ...CORS_ORIGINS,
   'http://localhost:5173',
   'http://localhost:3000',
   'http://localhost:4321',
-);
+];
 
 // Start escalation service
 escalationService.start();
@@ -33,17 +35,7 @@ app.use(express.json({ limit: '1mb' }));
 // ── CORS must run BEFORE auth so CORS headers are set on every response ──
 app.use(cors({
   origin: (origin, cb) => {
-    if (!origin) return cb(null, true);
-    if (ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
-    // Allow any localhost origin in development
-    const cleanOrigin = origin.replace(/\/+$/, '');
-    if (/^https?:\/\/localhost(:\d+)?$/.test(cleanOrigin)) return cb(null, true);
-    // Allow Render production domains
-    try {
-      const url = new URL(cleanOrigin);
-      if (url.hostname.endsWith('.onrender.com')) return cb(null, true);
-    } catch {}
-    cb(new Error(`Origin "${origin}" not allowed by CORS`));
+    cb(null, isOriginAllowed(origin, ALLOWED_ORIGINS));
   },
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-API-Key', 'X-Requested-With'],

@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getIncidents } from '../../lib/api';
 import { socket } from '../../lib/socket';
+import { mergeIncidents } from '../../lib/simulate-incident';
 import { MaterialSymbol } from '../../components/common/MaterialSymbol';
 import { Button } from '../../components/common/Button';
+import { ContextualTooltip } from '../../components/Walkthrough/ContextualTooltip';
 import styles from './Dashboard.module.css';
 
 const SEV_MAP = {
@@ -18,25 +20,40 @@ const Dashboard = () => {
   const [incidents, setIncidents] = useState([]);
   const [filter, setFilter] = useState('all');
 
+
   useEffect(() => {
     async function load() {
       try {
         const data = await getIncidents();
-        setIncidents(data.incidents || []);
+        setIncidents(mergeIncidents(data.incidents || []));
       } catch (err) {
-        console.error('Failed to fetch incidents:', err);
+        // If API fails, still try to show demo incidents
+        setIncidents(mergeIncidents([]));
       }
     }
     load();
     const interval = setInterval(load, 10000);
+
+    const handleDemoIncident = (e) => {
+      setIncidents((prev) => {
+        const demo = e.detail;
+        const exists = prev.some((i) => (i.incidentId || i.id) === (demo.incidentId || demo.id));
+        return exists ? prev : [demo, ...prev];
+      });
+    };
+
     socket.on('incident_created', (incident) => {
-      setIncidents((prev) => [incident, ...prev]);
+      setIncidents((prev) => mergeIncidents([incident, ...prev]));
     });
+
+    window.addEventListener('walkthrough:incident-created', handleDemoIncident);
+
     return () => {
       clearInterval(interval);
       socket.off('incident_created');
+      window.removeEventListener('walkthrough:incident-created', handleDemoIncident);
     };
-  }, []);
+  }, [mergeIncidents]);
 
   const p0Count = incidents.filter((i) => i.classification?.severity === 'P0_CRITICAL').length;
   const p1Count = incidents.filter((i) => i.classification?.severity === 'P1_HIGH').length;
@@ -66,13 +83,19 @@ const Dashboard = () => {
         </div>
         <div className={styles.filters}>
           {['all', 'P0_CRITICAL', 'P1_HIGH', 'P2_MEDIUM', 'P3_LOW'].map((f) => (
-            <button
-              key={f}
-              className={`${styles.filterPill} ${filter === f ? styles.filterPillActive : ''}`}
-              onClick={() => setFilter(f)}
-            >
-              {f === 'all' ? 'All' : f.replace('_', ' ')}
-            </button>
+            <span key={f} className={styles.filterWrap}>
+              <button
+                className={`${styles.filterPill} ${filter === f ? styles.filterPillActive : ''}`}
+                onClick={() => setFilter(f)}
+              >
+                {f === 'all' ? 'All' : f.replace('_', ' ')}
+              </button>
+              {f !== 'all' && (
+                <ContextualTooltip title={`${f.replace('_', ' ')} Filter`} placement="top">
+                  Show only incidents with {f.replace('_', ' ')} severity. This helps you focus on the most critical issues.
+                </ContextualTooltip>
+              )}
+            </span>
           ))}
           <Button variant="secondary" className={styles.sortBtn}>
             <MaterialSymbol icon="sort" className={styles.sortIcon} /> Sort
@@ -82,11 +105,21 @@ const Dashboard = () => {
 
       <div className={styles.statsGrid}>
         <div className={`${styles.statCard} ${styles.p0}`}>
-          <div className={styles.statLabel}>P0 Incidents</div>
+          <div className={styles.statLabel}>
+            P0 Incidents
+            <ContextualTooltip title="P0 Critical" placement="top">
+              Highest severity incidents requiring immediate response. Every minute of downtime can cost $500+.
+            </ContextualTooltip>
+          </div>
           <div className={`${styles.statNumber} ${styles.p0}`}>{p0Count}</div>
         </div>
         <div className={`${styles.statCard} ${styles.p1}`}>
-          <div className={styles.statLabel}>P1 Incidents</div>
+          <div className={styles.statLabel}>
+            P1 Incidents
+            <ContextualTooltip title="P1 High" placement="top">
+              High-severity incidents that need urgent attention but are not actively causing data loss.
+            </ContextualTooltip>
+          </div>
           <div className={`${styles.statNumber} ${styles.p1}`}>{p1Count}</div>
         </div>
 
@@ -99,6 +132,9 @@ const Dashboard = () => {
                   <span className={`${styles.severityBadge} ${styles[sorted[0].classification?.severity === 'P0_CRITICAL' ? 'p0' : 'p1']}`}>
                     {sorted[0].classification?.severity || 'N/A'}
                   </span>
+                  <ContextualTooltip title="Severity Badge" placement="top">
+                    Shows the incident severity level. P0_CRITICAL = system-down event, P1_HIGH = severe degradation.
+                  </ContextualTooltip>
                   <span className={styles.incidentId}>{sorted[0].incidentId || sorted[0].id}</span>
                   <span className={styles.pulseDot}></span>
                 </div>

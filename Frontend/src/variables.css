@@ -1,3 +1,89 @@
+/* ===== Theme CSS Variables ===== */
+
+/* ── Static sizing/spacing/font tokens (not theme-dependent) ── */
+:root {
+  /* Fonts */
+  --font-headline: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-code: 'JetBrains Mono', 'SF Mono', 'Fira Code', 'Consolas', monospace;
+  --font-label: 'Inter', system-ui, sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+
+  /* Radii */
+  --radius-default: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+
+  /* Layout */
+  --header-height: 56px;
+  --sidebar-width: 240px;
+}
+
+/* ── Dark theme (default) ── */
+:root.dark {
+  --background: #0f1117;
+  --surface: #1a1c26;
+  --surface-dim: #13151e;
+  --surface-variant: rgba(255, 255, 255, 0.06);
+  --surface-container: #1e202e;
+  --surface-container-highest: #252738;
+  --surface-container-low: #181a26;
+  --on-surface: #e8e8ee;
+  --on-surface-variant: #8f909e;
+  --primary: #788cff;
+  --primary-container: rgba(120, 140, 255, 0.12);
+  --on-primary-container: #b0b8ff;
+  --btn-primary-bg: #788cff;
+  --outline-variant: rgba(255, 255, 255, 0.08);
+  --tertiary: #a78bfa;
+  --error: #ef4444;
+  --error-container: rgba(239, 68, 68, 0.12);
+}
+
+/* ── Light theme ── */
+:root.light {
+  --background: #f4f5f7;
+  --surface: #ffffff;
+  --surface-dim: #e8e9ed;
+  --surface-variant: rgba(0, 0, 0, 0.04);
+  --surface-container: #ffffff;
+  --surface-container-highest: #f0f1f3;
+  --surface-container-low: #fafbfc;
+  --on-surface: #1a1c2e;
+  --on-surface-variant: #5f6070;
+  --primary: #4f6bef;
+  --primary-container: rgba(79, 107, 239, 0.1);
+  --on-primary-container: #3a50c8;
+  --btn-primary-bg: #4f6bef;
+  --outline-variant: rgba(0, 0, 0, 0.1);
+  --tertiary: #7c3aed;
+  --error: #dc2626;
+  --error-container: rgba(220, 38, 38, 0.1);
+}
+
+/* ===== Smooth theme transitions ===== */
+*,
+*::before,
+*::after {
+  transition: background-color 0.25s ease,
+              border-color 0.25s ease,
+              color 0.2s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+  }
+}
+
 /* ===== Layout for App ===== */
 .app-layout {
   display: flex;
