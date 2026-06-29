@@ -208,8 +208,8 @@ export async function beginPasskeySignup(req, res) {
       excludeCredentials: [],
       authenticatorSelection: {
         authenticatorAttachment: "platform",
-        residentKey: "preferred",
-        userVerification: "preferred",
+        residentKey: "required",
+        userVerification: "required",
       },
     });
 
@@ -313,8 +313,8 @@ export async function beginPasskeyRegistration(req, res) {
       authenticatorSelection: {
         // Prefer platform authenticators (built-in fingerprint/face) over cross-platform
         authenticatorAttachment: "platform",
-        residentKey: "preferred",
-        userVerification: "preferred",
+        residentKey: "required",
+        userVerification: "required",
       },
     });
 
@@ -439,11 +439,23 @@ export async function beginPasskeyLogin(req, res) {
       });
       challengeStore.set(`auth:${email}`, opts.challenge);
     } else {
-      // No email — use discoverable credentials (browser will identify the user)
+      // No email — list ALL known credentials so the browser can match any passkey.
+      // This works with both discoverable and non-discoverable credentials,
+      // unlike allowCredentials: [] which only works with resident keys.
+      const allCreds = [];
+      for (const [, creds] of credentials.entries()) {
+        for (const cred of creds) {
+          allCreds.push({
+            id: cred.id,
+            type: "public-key",
+            transports: cred.transports || ["internal"],
+          });
+        }
+      }
       opts = await generateAuthenticationOptions({
         rpID: getHostnameFromReq(req),
-        allowCredentials: [],
-        userVerification: "required",
+        allowCredentials: allCreds.length > 0 ? allCreds : [],
+        userVerification: "preferred",
       });
       const sessionKey = nextAnonSessionKey();
       challengeStore.set(sessionKey, opts.challenge);
@@ -535,7 +547,7 @@ export async function completePasskeyLogin(req, res) {
     persistCredentials();
 
     // Find or create the user in the shared user store
-    let userEntry = users.find((u) => u.email === resolvedEmail);
+    let userEntry = users.find((u) => u && u.email === resolvedEmail);
     if (!userEntry) {
       const id = `user_passkey_${Date.now()}`;
       userEntry = { id, name: resolvedEmail.split("@")[0], email: resolvedEmail };

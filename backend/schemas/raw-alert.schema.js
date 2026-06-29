@@ -12,14 +12,6 @@ export default {
 
     source: {
       type: "string",
-      enum: [
-        "email",
-        "discord",
-        "slack",
-        "log",
-        "webhook",
-        "chaos-panel",
-      ],
     },
 
     payload: {

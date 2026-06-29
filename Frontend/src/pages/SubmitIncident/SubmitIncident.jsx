@@ -70,7 +70,7 @@ const SubmitIncident = () => {
     setProgressMessage('Ingesting alert…');
     setSuccess(false);
     try {
-      const result = await ingestAlert({ source: 'manual', payload: rawAlert });
+      const result = await ingestAlert({ source: 'text', payload: rawAlert });
       if (!mountedRef.current) return;
       currentAlertId.current = result.alertId;
       if (result.alertId) {

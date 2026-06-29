@@ -115,16 +115,22 @@ function requireSession(req, res, next) {
 app.use(requireSession);
 
 app.get("/api/auth/me", async (req, res) => {
-  const session = req.user;
-  if (!session) {
-    return res.json({ success: true, user: null });
+  try {
+    const session = req.user;
+    if (!session) {
+      return res.json({ success: true, user: null });
+    }
+    // Safely find user — skip null entries in the array
+    const found = users.find(u => u && u.id === session.userId);
+    if (!found) {
+      return res.json({ success: true, user: null });
+    }
+    const { password: _, ...safeUser } = found;
+    res.json({ success: true, user: safeUser });
+  } catch (err) {
+    console.error("Error in /api/auth/me:", err);
+    res.json({ success: true, user: null });
   }
-  const found = users.find(u => u.id === session.userId);
-  if (!found) {
-    return res.json({ success: true, user: null });
-  }
-  const { password: _, ...safeUser } = found;
-  res.json({ success: true, user: safeUser });
 });
 
 app.post("/api/auth/logout", async (req, res) => {

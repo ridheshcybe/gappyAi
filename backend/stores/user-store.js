@@ -19,7 +19,9 @@ function loadFromFile() {
     const data = fs.readFileSync(USERS_FILE, 'utf-8');
     const parsed = JSON.parse(data);
     if (Array.isArray(parsed)) {
-      _users.push(...parsed);
+      // Filter out null/invalid entries to prevent crashes on lookup
+      const validUsers = parsed.filter(u => u && typeof u === 'object' && u.id);
+      _users.push(...validUsers);
     }
   } catch {}
 }
