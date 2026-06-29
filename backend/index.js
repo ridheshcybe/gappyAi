@@ -76,6 +76,8 @@ app.use((req, res, next) => {
 // Serve static files from frontend build
 app.use(express.static(join(__dirname, '..', 'Frontend', 'dist')));
 
+/******/
+
 // ── In-memory user store for auth (shared with passkey module) ──
 // users is imported from './stores/user-store.js'
 
@@ -276,11 +278,6 @@ app.get("/api/health", (req, res) => {
   });
 });
 
-// SPA fallback: serve index.html for all non-API GET requests
-app.get(/^(?!\/api\/).*/, (req, res) => {
-  // For all non-API GET requests, serve the frontend index.html
-  res.sendFile(join(__dirname, '..', 'Frontend', 'dist', 'index.html'));
-});
 
 // ── Global Error Handler (sanitizes internal details) ──
 app.use((err, req, res, next) => {

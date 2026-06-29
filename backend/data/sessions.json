@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "id": "sess_1782716489412_c4krs4o2u0t",
+    "userId": "user_passkey_1782716489412",
+    "email": "passkey_ridheshwalavalkarog_1782716485510@passkey.local",
+    "name": "ridheshwalavalkarog",
+    "createdAt": "2026-06-29T07:01:29.412Z",
+    "lastActive": "2026-06-29T07:01:29.412Z",
+    "expiresAt": "2026-06-30T07:01:29.412Z"
+  }
+]

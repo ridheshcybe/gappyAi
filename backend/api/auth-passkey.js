@@ -95,19 +95,23 @@ loadCredentials();
 
 const JWT_SECRET = process.env.JWT_SECRET || "secureops-dev-secret-change-in-production";
 const RP_NAME = "SecureOps Sync";
-const RP_ID = process.env.RP_ID || "localhost";
-const RP_ORIGIN = process.env.RP_ORIGIN || "http://localhost:3000";
-const RP_ORIGINS = [
-  RP_ORIGIN,
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'http://localhost:4321',
-];
 
-function getExpectedOrigin(req) {
+// Helper to get hostname from request (without port)
+function getHostnameFromReq(req) {
+  const host = req.headers.host || '';
+  return host.split(':')[0];
+}
+
+// Helper to get origin from request (using the Origin header sent by browser)
+function getOriginFromReq(req) {
   const origin = req.headers.origin;
-  if (origin && RP_ORIGINS.includes(origin)) return origin;
-  return RP_ORIGIN;
+  if (origin) {
+    return origin;
+  }
+  // Fallback: construct from request (should not happen in browser context)
+  const protocol = req.headers['x-forwarded-proto'] || req.protocol || 'http';
+  const host = req.headers['x-forwarded-host'] || req.headers.host || req.get('Host') || '';
+  return `${protocol}://${host}`;
 }
 
 /**
@@ -197,7 +201,7 @@ export async function beginPasskeySignup(req, res) {
 
     const opts = await generateRegistrationOptions({
       rpName: RP_NAME,
-      rpID: RP_ID,
+      rpID: getHostnameFromReq(req),
       userName: email,
       userDisplayName: name.trim(),
       attestationType: "none",
@@ -238,8 +242,8 @@ export async function completePasskeySignup(req, res) {
     const verification = await verifyRegistrationResponse({
       response,
       expectedChallenge: stored.challenge,
-      expectedOrigin: getExpectedOrigin(req),
-      expectedRPID: RP_ID,
+      expectedOrigin: getOriginFromReq(req),
+      expectedRPID: getHostnameFromReq(req),
     });
 
     if (!verification.verified) {
@@ -296,7 +300,7 @@ export async function beginPasskeyRegistration(req, res) {
 
     const opts = await generateRegistrationOptions({
       rpName: RP_NAME,
-      rpID: RP_ID,
+      rpID: getHostnameFromReq(req),
       userName: email,
       userDisplayName: name || email,
       attestationType: "none",
@@ -344,8 +348,8 @@ export async function completePasskeyRegistration(req, res) {
     const verification = await verifyRegistrationResponse({
       response,
       expectedChallenge,
-      expectedOrigin: getExpectedOrigin(req),
-      expectedRPID: RP_ID,
+      expectedOrigin: getOriginFromReq(req),
+      expectedRPID: getHostnameFromReq(req),
     });
 
     if (!verification.verified) {
@@ -425,7 +429,7 @@ export async function beginPasskeyLogin(req, res) {
         return res.status(404).json({ error: "No passkey found for this account. Register one first." });
       }
       opts = await generateAuthenticationOptions({
-        rpID: RP_ID,
+        rpID: getHostnameFromReq(req),
         allowCredentials: userCreds.map((cred) => ({
           id: cred.id,
           type: "public-key",
@@ -437,7 +441,7 @@ export async function beginPasskeyLogin(req, res) {
     } else {
       // No email — use discoverable credentials (browser will identify the user)
       opts = await generateAuthenticationOptions({
-        rpID: RP_ID,
+        rpID: getHostnameFromReq(req),
         allowCredentials: [],
         userVerification: "required",
       });
@@ -512,8 +516,8 @@ export async function completePasskeyLogin(req, res) {
     const verification = await verifyAuthenticationResponse({
       response,
       expectedChallenge,
-      expectedOrigin: getExpectedOrigin(req),
-      expectedRPID: RP_ID,
+      expectedOrigin: getOriginFromReq(req),
+      expectedRPID: getHostnameFromReq(req),
       credential: {
         id: authCred.id,
         publicKey: Buffer.from(authCred.publicKey, 'base64'),
