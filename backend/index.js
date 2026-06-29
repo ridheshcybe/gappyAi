@@ -5,7 +5,12 @@ import { createServer } from "http";
 import { initLemma } from './lemma-config.js';
 import { isOriginAllowed } from './lib/cors-utils.js';
 import { startCleanup as startSessionCleanup, createSession, getSession, deleteSession, deleteUserSessions } from './stores/session-store.js';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 import { ingestAlert } from "./input-handler.js";
 import { triageIncident } from "./triage-pipeline.js";
@@ -68,6 +73,9 @@ app.use((req, res, next) => {
   next();
 });
 
+// Serve static files from frontend build
+app.use(express.static(join(__dirname, '..', 'Frontend', 'dist')));
+
 // ── In-memory user store for auth (shared with passkey module) ──
 // users is imported from './stores/user-store.js'
 
@@ -122,8 +130,10 @@ app.post("/api/auth/login", async (req, res) => {
 
 // ── Session Authentication Middleware (replaces JWT) ──
 function requireSession(req, res, next) {
-  // Skip auth for health check and webhooks
-  if (req.path === '/api/health' || req.path.startsWith('/api/webhooks/')) return next();
+  // Skip auth for health check, webhooks, and static frontend routes
+  if (req.path === '/api/health' || req.path.startsWith('/api/webhooks/') || !req.path.startsWith('/api/')) {
+    return next();
+  }
 
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -264,6 +274,12 @@ app.get("/api/health", (req, res) => {
     service: "SecureOps Sync",
     timestamp: new Date().toISOString(),
   });
+});
+
+// SPA fallback: serve index.html for all non-API GET requests
+app.get(/^(?!\/api\/).*/, (req, res) => {
+  // For all non-API GET requests, serve the frontend index.html
+  res.sendFile(join(__dirname, '..', 'Frontend', 'dist', 'index.html'));
 });
 
 // ── Global Error Handler (sanitizes internal details) ──

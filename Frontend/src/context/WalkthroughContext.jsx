@@ -6,6 +6,8 @@ const WalkthroughContext = createContext();
 
 const WALKTHROUGH_KEY = 'secureops_walkthrough_completed';
 
+const API_URL = import.meta.env.VITE_API_URL || '';
+
 /**
  * Interactive walkthrough context.
  * Auto-shows tour on first auth (not first visit).
@@ -95,7 +97,6 @@ export const WalkthroughProvider = ({ children }) => {
 
     // Try the real API first — include JWT token
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4321';
       const token = (() => { try { return localStorage.getItem('secureops_auth_token'); } catch { return null; } })();
       const headers = { 'Content-Type': 'application/json' };
       if (token) headers['Authorization'] = `Bearer ${token}`;

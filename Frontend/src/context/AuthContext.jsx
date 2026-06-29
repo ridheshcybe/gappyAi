@@ -6,7 +6,7 @@ import {
 
 const AuthContext = createContext();
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4321';
+const API_URL = import.meta.env.VITE_API_URL || '';
 const USER_KEY = 'secureops_auth_user';
 const TOKEN_KEY = 'secureops_auth_token';
 
