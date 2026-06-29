@@ -8,7 +8,6 @@ import styles from './SubmitIncident.module.css';
 const STAGES = [
   { key: 'triage', label: 'AI Triage', icon: 'search' },
   { key: 'root-cause', label: 'Root Cause', icon: 'biotech' },
-  { key: 'runbook', label: 'Runbook', icon: 'description' },
   { key: 'validate', label: 'Validation', icon: 'fact_check' },
   { key: 'store', label: 'Storing', icon: 'save' },
   { key: 'history', label: 'History', icon: 'history' },
@@ -17,7 +16,6 @@ const STAGES = [
 ];
 
 const SubmitIncident = () => {
-  const [source, setSource] = useState('email');
   const [rawAlert, setRawAlert] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -72,7 +70,7 @@ const SubmitIncident = () => {
     setProgressMessage('Ingesting alert…');
     setSuccess(false);
     try {
-      const result = await ingestAlert({ source, payload: rawAlert });
+      const result = await ingestAlert({ source: 'manual', payload: rawAlert });
       if (!mountedRef.current) return;
       currentAlertId.current = result.alertId;
       if (result.alertId) {
@@ -105,7 +103,6 @@ const SubmitIncident = () => {
     if (loading) return;
     clearTimeout(successTimeoutRef.current);
     setRawAlert('');
-    setSource('email');
     resetFormState();
   };
 
@@ -113,30 +110,11 @@ const SubmitIncident = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <h1>Submit Incident</h1>
-        <p>Manually ingest alerts for AI-driven triage and runbook generation.</p>
+        <p>Manually ingest alerts for AI-driven triage and analysis.</p>
       </div>
 
       <div className={styles.formCard}>
         <form onSubmit={handleSubmit} className={styles.form}>
-          <div className={styles.field}>
-            <label htmlFor="alertSource">Alert Source</label>
-            <div className={styles.selectWrapper}>
-              <select
-                id="alertSource"
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-                className={`${styles.select} ${loading ? styles.selectDisabled : ''}`}
-                disabled={loading}
-              >
-                <option value="email">Email</option>
-                <option value="discord">Discord</option>
-
-                <option value="pagerduty">PagerDuty</option>
-                <option value="custom">Custom Webhook</option>
-              </select>
-              <MaterialSymbol icon="arrow_drop_down" className={styles.selectIcon} />
-            </div>
-          </div>
 
           <div className={styles.field}>
             <div className={styles.labelRow}>

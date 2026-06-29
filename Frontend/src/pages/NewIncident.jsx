@@ -5,7 +5,6 @@ import { socket } from "../lib/socket";
 const STAGES = [
   { key: "triage", label: "AI Triage" },
   { key: "root-cause", label: "Root Cause" },
-  { key: "runbook", label: "Runbook" },
   { key: "validate", label: "Validation" },
   { key: "store", label: "Storing" },
   { key: "history", label: "History" },

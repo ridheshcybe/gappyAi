@@ -5,19 +5,28 @@ import { Button } from '../../components/common/Button';
 import { useTheme } from '../../context/ThemeContext';
 import { useWalkthrough } from '../../context/WalkthroughContext';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../components/common/Toast';
+import { getPasskeyCredentials, deletePasskeyCredential } from '../../lib/api';
 import styles from './Settings.module.css';
 
 const Settings = () => {
-  const [onCall, setOnCall] = useState(true);
   const [teamMembers, setTeamMembers] = useState([
-    { id: 1, name: 'Ridhesh', email: 'ridhesh@secureops.dev', role: 'Primary Responder', onCall: true },
-    { id: 2, name: 'Alex M.', email: 'alex@secureops.dev', role: 'Backup Responder', onCall: false },
-    { id: 3, name: 'Samir K.', email: 'samir@secureops.dev', role: 'Engineering Lead', onCall: false },
-    { id: 4, name: 'Jordan W.', email: 'jordan@secureops.dev', role: 'SRE — Observability', onCall: true },
+    { id: 1, name: 'Ridhesh', email: 'ridhesh@secureops.dev', role: 'Engineer', onCall: true },
+    { id: 2, name: 'Alex M.', email: 'alex@secureops.dev', role: 'SRE', onCall: false },
+    { id: 3, name: 'Samir K.', email: 'samir@secureops.dev', role: 'Engineer', onCall: false },
+    { id: 4, name: 'Jordan W.', email: 'jordan@secureops.dev', role: 'SRE', onCall: true },
   ]);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [inviteForm, setInviteForm] = useState({ name: '', email: '', role: '' });
   const [confirmRemove, setConfirmRemove] = useState(null);
+  const [passkeys, setPasskeys] = useState([]);
+  const [passkeysLoading, setPasskeysLoading] = useState(false);
+  const [passkeyRegOpen, setPasskeyRegOpen] = useState(false);
+  const [regName, setRegName] = useState('');
+  const { addToast } = useToast();
+  const { user, isAuthenticated, online, setOnline, signOut, registerPasskey } = useAuth();
+  const { darkMode, toggleTheme } = useTheme();
+  const { startWalkthrough } = useWalkthrough();
 
   const handleInviteChange = (field, value) => {
     setInviteForm((prev) => ({ ...prev, [field]: value }));
@@ -42,13 +51,37 @@ const Settings = () => {
     setTeamMembers((prev) => prev.filter((m) => m.id !== id));
     setConfirmRemove(null);
   };
+
+  // Load passkeys
+  const loadPasskeys = useCallback(async () => {
+    setPasskeysLoading(true);
+    try {
+      const data = await getPasskeyCredentials();
+      setPasskeys(data.credentials || []);
+    } catch {
+      setPasskeys([]);
+    } finally {
+      setPasskeysLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isAuthenticated) loadPasskeys();
+  }, [isAuthenticated, loadPasskeys]);
+
+  const handleDeletePasskey = async (idx) => {
+    try {
+      await deletePasskeyCredential(idx);
+      addToast('Passkey removed.', 'success');
+      loadPasskeys();
+    } catch (err) {
+      addToast(err.message, 'error');
+    }
+  };
   const [pushEnabled, setPushEnabled] = useState(false);
   const [pushPermission, setPushPermission] = useState(
     'Notification' in window ? Notification.permission : 'unsupported'
   );
-  const { user, isAuthenticated, signOut } = useAuth();
-  const { darkMode, toggleTheme } = useTheme();
-  const { startWalkthrough } = useWalkthrough();
 
   // Listen for permission changes from browser
   useEffect(() => {
@@ -101,7 +134,7 @@ const Settings = () => {
       <div className={styles.header}>
         <h1 className={styles.pageTitle}>Settings</h1>
         <p className={styles.pageSubtitle}>
-          Manage your workspace — account, integrations, API keys, and team.
+          Manage your workspace — account and team.
         </p>
       </div>
 
@@ -118,23 +151,22 @@ const Settings = () => {
           </div>
 
           <div className={styles.cardGrid}>
-            {/* On-Call Status */}
+            {/* Online Status */}
             <div className={styles.card}>
               <div className={styles.cardRow}>
                 <div className={styles.cardLeft}>
                   <h4>
-                    <MaterialSymbol icon="phone_in_talk" className={styles.iconPrimary} />
-                    Active On-Call Status
+                    <MaterialSymbol icon="wifi" className={styles.iconPrimary} />
+                    Online Status
                   </h4>
                   <p>
-                    When enabled, you will receive immediate paging for P0 and P1 incidents
-                    based on your escalation policy.
+                    When enabled, you appear online and available to receive incident alerts and pages.
                   </p>
                 </div>
                 <Toggle
                   id="onCallToggle"
-                  checked={onCall}
-                  onChange={() => setOnCall(!onCall)}
+                  checked={online}
+                  onChange={() => setOnline(!online)}
                 />
               </div>
               <div className={styles.cardFooter}>
@@ -143,7 +175,7 @@ const Settings = () => {
                   <span className={styles.statusStatic}></span>
                 </span>
                 <span className={styles.statusText}>
-                  Current Shift: Primary Responder (Ends in 4h 23m)
+                  {online ? 'Online' : 'Offline'}
                 </span>
               </div>
             </div>
@@ -304,6 +336,71 @@ const Settings = () => {
                   </Button>
                 </div>
               </div>
+
+              {/* ── Passkey Management ── */}
+              <div className={styles.card}>
+                <h4>
+                  <MaterialSymbol icon="fingerprint" className={styles.iconPrimary} />
+                  Passkeys
+                </h4>
+                <p>Manage your saved passkeys for password-free sign-in.</p>
+
+                <div className={styles.passkeyList}>
+                  {passkeysLoading ? (
+                    <div className={styles.passkeyLoading}>
+                      <MaterialSymbol icon="autorenew" className={styles.spin} />
+                      Loading passkeys…
+                    </div>
+                  ) : passkeys.length === 0 ? (
+                    <div className={styles.passkeyEmpty}>
+                      <MaterialSymbol icon="fingerprint" />
+                      <span>No passkeys registered yet.</span>
+                    </div>
+                  ) : (
+                    passkeys.map((pk) => (
+                      <div key={pk.idx} className={styles.passkeyItem}>
+                        <div className={styles.passkeyIcon}>
+                          <MaterialSymbol icon="fingerprint" />
+                        </div>
+                        <div className={styles.passkeyInfo}>
+                          <span className={styles.passkeyDevice}>
+                            {pk.deviceType === 'singleDevice' ? 'This Device' : 'Cross-Platform Device'}
+                          </span>
+                          <span className={styles.passkeyMeta}>
+                            {pk.transports?.includes('internal') ? 'Platform authenticator' : 'External authenticator'}
+                            {pk.backedUp ? ' · Backed up' : ''}
+                          </span>
+                        </div>
+                        <button
+                          className={styles.removeBtn}
+                          onClick={() => handleDeletePasskey(pk.idx)}
+                          title="Remove passkey"
+                        >
+                          <MaterialSymbol icon="remove_circle" />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div className={styles.passkeyActions}>
+                  <Button
+                    variant="secondary"
+                    onClick={async () => {
+                      try {
+                        await registerPasskey();
+                        addToast('New passkey registered!', 'success');
+                        loadPasskeys();
+                      } catch (err) {
+                        addToast(err.message, 'error');
+                      }
+                    }}
+                  >
+                    <MaterialSymbol icon="add" />
+                    Register New Passkey
+                  </Button>
+                </div>
+              </div>
             </div>
           ) : (
             <div className={styles.accountSignInPrompt}>
@@ -314,132 +411,6 @@ const Settings = () => {
               </Button>
             </div>
           )}
-        </section>
-
-        {/* ═══════════════ Integrations ═══════════════ */}
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <MaterialSymbol icon="extension" className={styles.sectionIcon} />
-            <div>
-              <h2 className={styles.sectionTitle}>Integrations</h2>
-              <p className={styles.sectionDesc}>Connect external tools to your SecureOps Sync workspace.</p>
-            </div>
-          </div>
-
-          <div className={styles.integrationGrid}>
-            <div className={styles.integrationCard}>
-              <div className={styles.integrationHeader}>
-                <div className={styles.integrationIcon}>
-                  <MaterialSymbol icon="contact_emergency" />
-                </div>
-                <div className={styles.disconnectedBadge}>
-                  <MaterialSymbol icon="radio_button_unchecked" />
-                  Disconnected
-                </div>
-              </div>
-              <h4>PagerDuty</h4>
-              <p>Sync escalation policies and trigger on-call routing automatically.</p>
-              <div className={styles.integrationFooter}>
-                <button className={styles.connectBtn}>Connect</button>
-              </div>
-            </div>
-
-            <div className={styles.integrationCard}>
-              <div className={styles.integrationHeader}>
-                <div className={styles.integrationIcon}>
-                  <MaterialSymbol icon="code" />
-                </div>
-                <div className={styles.connectedBadge}>
-                  <MaterialSymbol icon="check_circle" />
-                  Connected
-                </div>
-              </div>
-              <h4>GitHub Enterprise</h4>
-              <p>Link commits to incidents and automate runbook execution.</p>
-              <div className={styles.integrationFooter}>
-                <span>Org: secureops-inc</span>
-                <button className={styles.manageBtn}>Manage</button>
-              </div>
-            </div>
-
-            <div className={styles.integrationCard}>
-              <div className={styles.integrationHeader}>
-                <div className={styles.integrationIcon}>
-                  <MaterialSymbol icon="sms" />
-                </div>
-                <div className={styles.disconnectedBadge}>
-                  <MaterialSymbol icon="radio_button_unchecked" />
-                  Disconnected
-                </div>
-              </div>
-              <h4>Slack</h4>
-              <p>Post incident alerts and runbook updates to your team channels.</p>
-              <div className={styles.integrationFooter}>
-                <button className={styles.connectBtn}>Connect</button>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ═══════════════ API Keys ═══════════════ */}
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <MaterialSymbol icon="key" className={styles.sectionIcon} />
-            <div>
-              <h2 className={styles.sectionTitle}>API Keys</h2>
-              <p className={styles.sectionDesc}>Manage credentials for programmatic access to the incident pipeline.</p>
-            </div>
-          </div>
-
-          <div className={styles.apiKeys}>
-            <div className={styles.apiKeyCard}>
-              <div className={styles.apiKeyHeader}>
-                <div className={styles.apiKeyInfo}>
-                  <span className={styles.apiKeyName}>Production Access</span>
-                  <span className={styles.apiKeyEnv}>env: production</span>
-                </div>
-                <span className={styles.apiKeyBadge}>Active</span>
-              </div>
-              <div className={styles.apiKeyRow}>
-                <code className={styles.apiKeyValue}>sk‑so‑prod‑a7f3…c9e2</code>
-                <button className={styles.apiKeyAction}>
-                  <MaterialSymbol icon="visibility" /> Show
-                </button>
-              </div>
-              <div className={styles.apiKeyMeta}>
-                <span>Created: 12 Jan 2026</span>
-                <span>Last used: 28 Jun 2026</span>
-              </div>
-            </div>
-
-            <div className={styles.apiKeyCard}>
-              <div className={styles.apiKeyHeader}>
-                <div className={styles.apiKeyInfo}>
-                  <span className={styles.apiKeyName}>Staging Access</span>
-                  <span className={styles.apiKeyEnv}>env: staging</span>
-                </div>
-                <span className={`${styles.apiKeyBadge} ${styles.apiKeyBadgeWarn}`}>Expiring</span>
-              </div>
-              <div className={styles.apiKeyRow}>
-                <code className={styles.apiKeyValue}>sk‑so‑stg‑b4d1…f7a8</code>
-                <button className={styles.apiKeyAction}>
-                  <MaterialSymbol icon="visibility" /> Show
-                </button>
-              </div>
-              <div className={styles.apiKeyMeta}>
-                <span>Created: 15 Mar 2026</span>
-                <span>Expires: 15 Jul 2026</span>
-              </div>
-            </div>
-
-            <div className={styles.apiKeyEmpty}>
-              <MaterialSymbol icon="add_circle" className={styles.apiKeyEmptyIcon} />
-              <p>Need a new key? Generate one with scoped permissions.</p>
-              <Button variant="secondary">
-                <MaterialSymbol icon="add" /> Generate Key
-              </Button>
-            </div>
-          </div>
         </section>
 
         {/* ═══════════════ Team ═══════════════ */}
@@ -515,7 +486,7 @@ const Settings = () => {
                 </div>
                 <span className={styles.teamMemberStatus}>
                   <span className={member.onCall ? styles.teamStatusDot : styles.teamStatusDotOff}></span>
-                  {member.onCall ? 'On-Call' : 'Off-Call'}
+                  {member.onCall ? 'Online' : 'Offline'}
                 </span>
                 <button
                   className={styles.removeBtn}

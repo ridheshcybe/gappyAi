@@ -8,126 +8,106 @@ import { simulateIncident } from '../../lib/simulate-incident';
 import styles from './Walkthrough.module.css';
 
 /**
- * Walkthrough steps.
+ * Polished product tour steps.
  *
  * Step types:
  * - 'info'     – centered card with text, no target
- * - 'target'   – floating card pointing to a target element
- * - 'navigate' – user clicks "Next" to auto-navigate to a route
- * - 'action'   – user must click a specific element to proceed; shows a pulse on the target
- * - 'code'     – centered card with a copy-pasteable code snippet
- * - 'incubate' – waiting step (incident processing); shows a progress indicator
+ * - 'target'   – floating card pointing to a target element on the page
+ * - 'navigate' – auto-navigates to a route
+ * - 'action'   – user must interact with a highlighted element
+ * - 'code'     – centered card with a trigger button
+ * - 'incubate' – waiting step with animated progress
+ * - 'auto'     – auto-advancing step with countdown
  */
 const STEPS = [
-  // ── 1. Welcome ──
   {
     id: 'welcome',
     type: 'info',
     title: 'Welcome to SecureOps Sync',
     description:
-      'This is your incident response command center. Let\'s walk through the key parts — it only takes a minute.',
+      'Your incident response command center. You\'re signed in and ready. This quick tour will walk you through the key areas — it only takes a minute.',
     icon: 'rocket_launch',
   },
-
-  // ── 2. Sidebar ──
   {
     id: 'sidebar',
     type: 'target',
-    title: 'Navigate Your Workspace',
+    title: 'Sidebar — Your Command Hub',
     description:
-      'The sidebar connects every section: Dashboard, Incidents, Analytics, Runbooks, and Settings. Each view manages a different phase of the incident lifecycle.',
+      'Everything lives in the sidebar: Dashboard, Incidents, Analytics, Submit, and Settings. Toggle dark/light mode, check your connection status, and sign out — all from here.',
     icon: 'menu',
     targetSelector: '[class*="sidebar"]',
     tooltipPlacement: 'right',
   },
-
-  // ── 3. Dashboard Live View ──
   {
     id: 'dashboard',
     type: 'target',
     title: 'Live Incident Dashboard',
     description:
-      'Your main command center. P0/P1 counts show the most urgent incidents at a glance. The featured card highlights the most critical ongoing issue, and the list below updates in real time via WebSocket.',
+      'Your command center. P0/P1 counts show the most urgent incidents at a glance. The featured card highlights the critical issue, and the live list updates in real time via WebSocket.',
     icon: 'dashboard',
     targetSelector: '[class*="statCard"]',
     tooltipPlacement: 'bottom',
   },
-
-  // ── 4. Trigger a sample incident ──
   {
     id: 'ingest-command',
     type: 'code',
-    title: 'Trigger a Sample Incident',
+    title: 'Try It — Inject a Sample Incident',
     description:
-      'Click the button below to inject a real P0 incident into the AI pipeline. It simulates a DB connection pool exhaustion scenario.',
+      'Click the button below to inject a real P0 incident into the AI pipeline. It simulates a DB connection pool exhaustion on the Payments API — watch it get triaged in real time.',
     icon: 'bolt',
-    buttonLabel: 'Inject Incident →',
+    buttonLabel: '🔥 Inject P0 Incident',
   },
-
-  // ── 5. Processing ──
   {
     id: 'processing',
     type: 'incubate',
-    title: 'Incident Processing',
+    title: 'AI Pipeline Processing',
     description:
-      'The AI pipeline is analyzing the incident — classifying severity, identifying root cause, and generating a runbook.',
+      'The triage engine is analyzing the incident — classifying severity, identifying root cause, and preparing remediation steps. This only takes a moment.',
     icon: 'autorenew',
     duration: 1500,
   },
-
-  // ── 6. Auto: Navigating to Dashboard ──
   {
     id: 'nav-dashboard',
     type: 'auto',
-    title: 'Viewing Dashboard',
+    title: 'Your Incident on the Dashboard',
     description:
-      'Your incident has been created and triaged. Taking you to the Dashboard to see it in the live view.',
+      'Head to the Dashboard to see your new P0_CRITICAL incident live in the feed with its AI-generated headline, severity badge, and confidence score.',
     icon: 'dashboard',
     route: '/',
     autoAdvanceDelay: 800,
   },
-
-  // ── 7. Auto: See incident on Dashboard ──
   {
     id: 'see-incident',
     type: 'auto',
-    title: 'Your Incident is Live',
+    title: 'It\'s Live',
     description:
-      'Look for your new P0_CRITICAL incident in the featured card or incident list. Notice the severity badge, AI headline, and confidence score.',
+      'Look for the featured card — it shows the most critical incident. Notice the severity badge, AI analysis headline, and confidence score. Click any incident to dive deeper.',
     icon: 'visibility',
     autoAdvanceDelay: 3000,
   },
-
-  // ── 8. Auto: Navigate to Incidents ──
   {
     id: 'nav-incidents',
     type: 'auto',
-    title: 'Incidents Overview',
+    title: 'Incidents Page',
     description:
-      'The Incidents page lists every alert with AI triage — severity, component, headline, and confidence. Full detail view with AI Copilot is a click away.',
+      'The Incidents page lists every alert with AI triage data — severity, component, headline, and confidence. Sort, filter, and click through to the full incident view with AI Copilot.',
     icon: 'security',
     route: '/incidents',
     autoAdvanceDelay: 800,
   },
-
-  // ── 9. Complete ──
   {
     id: 'complete',
     type: 'auto',
-    title: 'You\'re All Set',
+    title: 'You\'re All Set!',
     description:
-      'You\'ve seen the core workflow: create an incident → AI triage → view results. Replay this tour anytime from Settings. Happy incident responding!',
+      'You\'ve seen the full workflow: inject an incident → AI triage → view results. Replay this tour anytime from Settings. Happy incident responding!',
     icon: 'check_circle',
     autoAdvanceDelay: 3000,
   },
 ];
 
 export const Walkthrough = () => {
-  const {
-    isOpen,
-    dismissWalkthrough,
-    completeWalkthrough,
-  } = useWalkthrough();
+  const { isOpen, dismissWalkthrough, completeWalkthrough } = useWalkthrough();
   const { addToast } = useToast();
   const navigate = useNavigate();
 
@@ -136,25 +116,43 @@ export const Walkthrough = () => {
   const [visible, setVisible] = useState(false);
   const [exiting, setExiting] = useState(false);
   const [incubating, setIncubating] = useState(false);
-  const [actionCompleted, setActionCompleted] = useState(false);
   const [triggering, setTriggering] = useState(false);
+  const [entering, setEntering] = useState(false);
   const tooltipRef = useRef(null);
+  const arrowIdRef = useRef(`arrowGrad_${Math.random().toString(36).slice(2, 8)}`);
 
   // ── Animate in ──
   useEffect(() => {
     if (isOpen) {
-      const t = setTimeout(() => setVisible(true), 50);
+      setExiting(false);
+      const t = setTimeout(() => {
+        setVisible(true);
+        setEntering(true);
+      }, 50);
       return () => clearTimeout(t);
     } else {
       setVisible(false);
+      setEntering(false);
       resetStepState();
     }
   }, [isOpen]);
 
+  // ── Step entrance animation ──
+  useEffect(() => {
+    if (visible) {
+      // Reset entrance, then trigger it
+      setEntering(false);
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setEntering(true);
+        });
+      });
+    }
+  }, [stepIndex, visible]);
+
   function resetStepState() {
     setStepIndex(0);
     setIncubating(false);
-    setActionCompleted(false);
     setTriggering(false);
     setTooltipStyle({});
   }
@@ -176,7 +174,7 @@ export const Walkthrough = () => {
     const rect = target.getBoundingClientRect();
     const placement = step.tooltipPlacement || 'right';
     const gap = 18;
-    const tooltipWidth = 320;
+    const tooltipWidth = 340;
 
     let top, left;
 
@@ -205,8 +203,7 @@ export const Walkthrough = () => {
     // Clamp to viewport
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-    const estimatedHeight = 220;
-
+    const estimatedHeight = 240;
     left = Math.max(gap, Math.min(left, vw - tooltipWidth - gap));
     top = Math.max(gap, Math.min(top, vh - estimatedHeight - gap));
 
@@ -220,14 +217,12 @@ export const Walkthrough = () => {
     return () => window.removeEventListener('resize', positionTooltip);
   }, [visible, positionTooltip, stepIndex]);
 
-  // ── Auto-advance effect ──
-  // Runs when step changes: handles incubate, auto, and navigate steps
+  // ── Auto-advance effect for incubate/auto steps ──
   const autoAdvanceRef = useRef(null);
   useEffect(() => {
     const step = STEPS[stepIndex];
     if (!step || !visible) return;
 
-    // Clear any pending auto-advance
     if (autoAdvanceRef.current) {
       clearTimeout(autoAdvanceRef.current);
       autoAdvanceRef.current = null;
@@ -242,10 +237,7 @@ export const Walkthrough = () => {
     }
 
     if (step.type === 'auto') {
-      // Navigate if route is specified
-      if (step.route) {
-        navigate(step.route);
-      }
+      if (step.route) navigate(step.route);
       autoAdvanceRef.current = setTimeout(() => {
         advance();
       }, step.autoAdvanceDelay || 2000);
@@ -259,6 +251,7 @@ export const Walkthrough = () => {
     };
   }, [stepIndex, visible, navigate]);
 
+  // ── Advance / Prev ──
   function advance() {
     if (stepIndex < STEPS.length - 1) {
       setStepIndex((i) => i + 1);
@@ -267,7 +260,6 @@ export const Walkthrough = () => {
     }
   }
 
-  // ── Trigger incident handler ──
   const handleTrigger = useCallback(async () => {
     setTriggering(true);
     try {
@@ -278,81 +270,32 @@ export const Walkthrough = () => {
         severity: 'P0',
         symptoms: ['High latency on checkout', '500 errors spiking', 'Postgres connections maxed'],
       });
-      addToast(
-        '✅ P0 incident injected — AI pipeline processing.',
-        'success',
-        5000
-      );
+      addToast('P0 incident injected — AI pipeline processing.', 'success', 5000);
     } catch {
-      // Backend unavailable — fall back to local simulation
       simulateIncident({
         title: 'DB Connection Pool Exhausted',
         service: 'Payments API',
         severity: 'P0',
         symptoms: ['High latency on checkout', '500 errors spiking', 'Postgres connections maxed'],
       });
-      addToast(
-        '⚡ Demo incident created (offline mode) — navigating to Dashboard.',
-        'success',
-        5000
-      );
+      addToast('Demo incident created (offline mode).', 'success', 5000);
     } finally {
       setTriggering(false);
-      // Advance to incubate step
       setStepIndex((i) => i + 1);
     }
   }, [addToast]);
 
-  // ── Next / Prev ──
   const handleNext = useCallback(() => {
     const step = STEPS[stepIndex];
-
-    // For action steps, don't allow Next until action is done
-    if (step.type === 'action' && !actionCompleted) {
-      return;
-    }
-
-    // For incubate/auto step, advance() handles it via effect
-    if (step.type === 'incubate' || step.type === 'auto') {
-      return;
-    }
-
-    // For code steps (trigger type), handleNext is disabled — user must click the trigger button
-    if (step.type === 'code' && !triggering) {
-      return;
-    }
-
-    // For navigate steps, trigger the navigation
-    if (step.type === 'navigate') {
-      if (step.route) {
-        navigate(step.route);
-        setTimeout(() => {
-          if (stepIndex < STEPS.length - 1) {
-            setStepIndex((i) => i + 1);
-          } else {
-            handleComplete();
-          }
-        }, 400);
-        return;
-      }
-    }
-
-    if (stepIndex < STEPS.length - 1) {
-      setStepIndex((i) => i + 1);
-    } else {
-      handleComplete();
-    }
-  }, [stepIndex, actionCompleted, navigate]);
+    if (step.type === 'incubate' || step.type === 'auto') return;
+    if (step.type === 'code' && !triggering) return;
+    advance();
+  }, [stepIndex, triggering]);
 
   const handlePrev = useCallback(() => {
     if (stepIndex > 0) {
       setStepIndex((i) => i - 1);
     }
-  }, [stepIndex]);
-
-  // ── Reset action state on step changes ──
-  useEffect(() => {
-    setActionCompleted(false);
   }, [stepIndex]);
 
   const handleComplete = useCallback(() => {
@@ -393,9 +336,7 @@ export const Walkthrough = () => {
   const step = STEPS[stepIndex];
   const isFirst = stepIndex === 0;
   const isLast = stepIndex === STEPS.length - 1;
-  const isCentered = step.type === 'info' || step.type === 'incubate' || step.type === 'auto' || step.type === 'code';
-  const isActionStep = step.type === 'action';
-  const isNavigateStep = step.type === 'navigate';
+  const isCentered = ['info', 'incubate', 'auto', 'code'].includes(step.type);
   const isCodeStep = step.type === 'code';
   const isIncubateStep = step.type === 'incubate';
   const isAutoStep = step.type === 'auto';
@@ -404,30 +345,40 @@ export const Walkthrough = () => {
 
   return (
     <div
-      className={`${styles.overlay} ${visible ? styles.overlayVisible : ''} ${exiting ? styles.overlayExiting : ''} ${isActionStep && !actionCompleted ? styles.overlayClickThrough : ''}`}
+      className={[
+        styles.overlay,
+        visible ? styles.overlayVisible : '',
+        exiting ? styles.overlayExiting : '',
+      ].join(' ')}
     >
-      {/* Highlight ring for target/action steps */}
+      {/* Spotlight highlight for target steps */}
       {needsTarget && step.targetSelector && (
-        <HighlightRing
+        <SpotlightHighlight
           selector={step.targetSelector}
-          visible={visible}
-          pulse={isActionStep && !actionCompleted}
+          visible={visible && entering}
         />
       )}
 
       {/* Connector arrow for floating tooltips */}
-      {!isCentered && step.targetSelector && !isActionStep && (
+      {!isCentered && step.targetSelector && (
         <ConnectorArrow
+          key={`arrow-${stepIndex}`}
           selector={step.targetSelector}
           placement={step.tooltipPlacement || 'right'}
           tooltipStyle={tooltipStyle}
+          gradientId={arrowIdRef.current}
         />
       )}
 
       {/* Tooltip card */}
       <div
         ref={tooltipRef}
-        className={`${styles.tooltip} ${isCentered ? styles.tooltipCenter : styles.tooltipFloating} ${visible ? styles.tooltipVisible : ''} ${isActionStep && !actionCompleted ? styles.tooltipAction : ''}`}
+        className={[
+          styles.tooltip,
+          isCentered ? styles.tooltipCenter : styles.tooltipFloating,
+          visible && entering ? styles.tooltipEnter : '',
+          visible ? styles.tooltipVisible : '',
+        ].join(' ')}
         style={isCentered ? {} : tooltipStyle}
       >
         {/* Progress bar */}
@@ -435,12 +386,17 @@ export const Walkthrough = () => {
           <div className={styles.progressFill} style={{ width: `${progress}%` }} />
         </div>
 
-        {/* Icon (spinning for incubate) */}
+        {/* Step counter */}
+        <div className={styles.stepCounter}>
+          Step {stepIndex + 1} of {STEPS.length}
+        </div>
+
+        {/* Icon */}
         <div className={`${styles.iconWrap} ${isIncubateStep ? styles.iconSpin : ''}`}>
           <MaterialSymbol icon={step.icon} className={styles.stepIcon} />
         </div>
 
-        {/* Content */}
+        {/* Title & description */}
         <h3 className={styles.title}>{step.title}</h3>
         <p className={styles.desc}>{step.description}</p>
 
@@ -460,41 +416,26 @@ export const Walkthrough = () => {
               ) : (
                 <>
                   <MaterialSymbol icon="bolt" />
-                  {step.buttonLabel || 'Inject Incident →'}
+                  {step.buttonLabel || 'Inject Incident'}
                 </>
               )}
             </button>
           </div>
         )}
 
-        {/* Action hint for action steps */}
-        {isActionStep && !actionCompleted && (
-          <div className={styles.actionHint}>
-            <span className={styles.actionPulse} />
-            {step.actionHint || 'Click the highlighted element above'}
-          </div>
-        )}
-
-        {/* Action completed feedback */}
-        {isActionStep && actionCompleted && (
-          <div className={styles.actionDone}>
-            <MaterialSymbol icon="check_circle" /> Done!
-          </div>
-        )}
-
-        {/* Incubate spinner */}
+        {/* Incubate progress animation */}
         {isIncubateStep && (
-          <div className={styles.incubateBar}>
+          <div className={styles.incubateSection}>
             <div className={styles.incubateTrack}>
               <div className={styles.incubateFill} />
             </div>
-            <span className={styles.incubateLabel}>Processing incident…</span>
+            <span className={styles.incubateLabel}>Analyzing incident…</span>
           </div>
         )}
 
         {/* Auto-advance countdown */}
         {isAutoStep && (
-          <div className={styles.autoProgress}>
+          <div className={styles.autoSection}>
             <div className={styles.autoTrack}>
               <div
                 className={styles.autoFill}
@@ -504,7 +445,7 @@ export const Walkthrough = () => {
           </div>
         )}
 
-        {/* Step indicator */}
+        {/* Navigation dots */}
         <div className={styles.dots}>
           {STEPS.map((_, i) => (
             <button
@@ -516,110 +457,109 @@ export const Walkthrough = () => {
           ))}
         </div>
 
-        {/* Actions */}
+        {/* Footer actions */}
         <div className={styles.actions}>
           <button className={styles.skipBtn} onClick={handleSkip}>
-            Skip tour
+            <MaterialSymbol icon="close" /> Skip
           </button>
+
           <div className={styles.navButtons}>
             {!isFirst && (
-              <button className={styles.navBtn} onClick={handlePrev}>
+              <button className={styles.navBtn} onClick={handlePrev} title="Previous (←)">
                 <MaterialSymbol icon="arrow_back" />
               </button>
             )}
 
-            {/* Navigate step button — calls handleNext which handles navigation */}
-            {isNavigateStep && (
-              <button className={styles.nextBtn} onClick={handleNext}>
-                <MaterialSymbol icon="open_in_new" />
-                {step.actionLabel || 'Go'}
-              </button>
-            )}
-
-            {/* Action step: show "Skip" if not done, or advance */}
-            {isActionStep && actionCompleted && (
-              <button className={styles.nextBtn} onClick={handleNext}>
-                Next <MaterialSymbol icon="arrow_forward" />
-              </button>
-            )}
-
-            {/* Incubate step */}
-            {isIncubateStep && (
-              <button className={styles.nextBtn} disabled>
-                <MaterialSymbol icon="autorenew" className={styles.iconSpin} />
-                Processing…
-              </button>
-            )}
-
-            {/* Auto step — no button needed, auto-advances */}
-            {isAutoStep && (
-              <button className={styles.nextBtn} disabled>
-                <MaterialSymbol icon="arrow_forward" />
-                Next
-              </button>
-            )}
-
-            {/* Code step — no navigation buttons, trigger button handles everything */}
-            {isCodeStep && (
-              <button className={styles.nextBtn} disabled={!triggering}>
-                {triggering ? 'Processing…' : 'Waiting…'}
-              </button>
-            )}
-
-            {/* Info/target step standard Next/Done */}
-            {!isNavigateStep && !isActionStep && !isIncubateStep && !isAutoStep && !isCodeStep && (
+            {/* Info/target standard step */}
+            {['info', 'target', 'navigate'].includes(step.type) && (
               <button className={styles.nextBtn} onClick={handleNext}>
                 {isLast ? 'Done' : 'Next'}
                 {!isLast && <MaterialSymbol icon="arrow_forward" />}
               </button>
             )}
+
+            {/* Code step — trigger handles everything */}
+            {isCodeStep && (
+              <button className={styles.nextBtn} disabled={!triggering}>
+                {triggering ? (
+                  <><MaterialSymbol icon="autorenew" className={styles.iconSpin} /> Processing</>
+                ) : 'Waiting…'}
+              </button>
+            )}
+
+            {/* Incubate step — disabled during processing */}
+            {isIncubateStep && (
+              <button className={styles.nextBtn} disabled>
+                <MaterialSymbol icon="autorenew" className={styles.iconSpin} /> Processing
+              </button>
+            )}
+
+            {/* Auto step */}
+            {isAutoStep && (
+              <button className={styles.nextBtn} disabled>
+                <MaterialSymbol icon="arrow_forward" /> Next
+              </button>
+            )}
           </div>
+        </div>
+
+        {/* Keyboard hint */}
+        <div className={styles.kbdHint}>
+          <span>Use <kbd>→</kbd> <kbd>←</kbd> to navigate · <kbd>Esc</kbd> to skip</span>
         </div>
       </div>
     </div>
   );
 };
 
-// ── Highlight Ring ──
-function HighlightRing({ selector, visible, pulse = false }) {
+// ── Spotlight Highlight ──
+function SpotlightHighlight({ selector, visible }) {
   const [style, setStyle] = useState({});
 
   useEffect(() => {
     if (!visible || !selector) return;
 
-    const updatePosition = () => {
+    const update = () => {
       const el = document.querySelector(selector);
       if (!el) return;
       const rect = el.getBoundingClientRect();
       setStyle({
-        top: rect.top - 6,
-        left: rect.left - 6,
-        width: rect.width + 12,
-        height: rect.height + 12,
+        top: rect.top - 8,
+        left: rect.left - 8,
+        width: rect.width + 16,
+        height: rect.height + 16,
       });
     };
 
-    updatePosition();
-    window.addEventListener('resize', updatePosition);
-    window.addEventListener('scroll', updatePosition, true);
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
     return () => {
-      window.removeEventListener('resize', updatePosition);
-      window.removeEventListener('scroll', updatePosition, true);
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
     };
   }, [selector, visible]);
 
   if (!style.width) return null;
 
   return (
-    <div
-      className={`${styles.highlightRing} ${visible ? styles.highlightVisible : ''} ${pulse ? styles.highlightPulse : ''}`}
-      style={style}
-    />
+    <>
+      {/* Outer glow ring */}
+      <div
+        className={`${styles.spotlightRing} ${visible ? styles.spotlightVisible : ''}`}
+        style={style}
+      />
+      {/* Inner highlight border */}
+      <div
+        className={`${styles.spotlightBorder} ${visible ? styles.spotlightVisible : ''}`}
+        style={style}
+      />
+    </>
   );
 }
 
 // ── Connector Arrow ──
-function ConnectorArrow({ selector, placement, tooltipStyle }) {
+function ConnectorArrow({ selector, placement, tooltipStyle, gradientId = 'arrowGrad' }) {
   const [arrowStyle, setArrowStyle] = useState({});
 
   useEffect(() => {
@@ -629,42 +569,33 @@ function ConnectorArrow({ selector, placement, tooltipStyle }) {
     if (!el) return;
     const rect = el.getBoundingClientRect();
 
-    const tooltipTop = tooltipStyle.top || 0;
-    const tooltipLeft = tooltipStyle.left || 0;
-    const tooltipW = 320;
-
     let top, left, rotation;
 
     switch (placement) {
-      case 'right': {
-        top = rect.top + rect.height / 2 - 4;
+      case 'right':
+        top = rect.top + rect.height / 2 - 6;
         left = rect.right + 4;
         rotation = 0;
         break;
-      }
-      case 'left': {
-        top = rect.top + rect.height / 2 - 4;
-        left = rect.left - 16;
+      case 'left':
+        top = rect.top + rect.height / 2 - 6;
+        left = rect.left - 18;
         rotation = 180;
         break;
-      }
-      case 'bottom': {
+      case 'bottom':
         top = rect.bottom + 4;
         left = rect.left + rect.width / 2 - 8;
         rotation = 90;
         break;
-      }
-      case 'top': {
-        top = rect.top - 16;
+      case 'top':
+        top = rect.top - 18;
         left = rect.left + rect.width / 2 - 8;
         rotation = -90;
         break;
-      }
-      default: {
-        top = rect.top + rect.height / 2 - 4;
+      default:
+        top = rect.top + rect.height / 2 - 6;
         left = rect.right + 4;
         rotation = 0;
-      }
     }
 
     setArrowStyle({ top, left, transform: `rotate(${rotation}deg)` });
@@ -674,8 +605,14 @@ function ConnectorArrow({ selector, placement, tooltipStyle }) {
 
   return (
     <div className={styles.connectorArrow} style={arrowStyle}>
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-        <path d="M0 7L14 0L14 14L0 7Z" fill="rgba(120, 140, 255, 0.35)" />
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M0 8L16 1L16 15L0 8Z" fill={`url(#${gradientId})`} />
+        <defs>
+          <linearGradient id={gradientId} x1="0" y1="0" x2="16" y2="8">
+            <stop offset="0%" stopColor="#788cff" stopOpacity="0.5" />
+            <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.9" />
+          </linearGradient>
+        </defs>
       </svg>
     </div>
   );

@@ -116,10 +116,10 @@ export const TopNav = ({ onToggleSidebar, sidebarOpen }) => {
               aria-label="User menu"
               aria-expanded={userMenuOpen}
             >
-              <MaterialSymbol icon="account_circle" />
+              <span className={styles.userInitial}>{user?.name ? user.name.trim().charAt(0).toUpperCase() : 'U'}</span>
             </button>
             <ContextualTooltip title="User Profile" placement="bottom">
-              Your account, on-call status, and login session.
+              Your account, online status, and login session.
             </ContextualTooltip>
 
             {userMenuOpen && (
@@ -136,7 +136,7 @@ export const TopNav = ({ onToggleSidebar, sidebarOpen }) => {
                 <div className={styles.userMenuBody}>
                   <div className={styles.userStatus}>
                     <span className={styles.statusDot} />
-                    <span>On-Call — Incident Response</span>
+                    <span>Online</span>
                   </div>
                   <Link
                     to="/settings"

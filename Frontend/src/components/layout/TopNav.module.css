@@ -137,6 +137,19 @@
   background-color: var(--surface-variant);
 }
 
+.userInitial {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-container), var(--primary));
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .iconBtnWrapper {
   position: relative;
   display: inline-flex;

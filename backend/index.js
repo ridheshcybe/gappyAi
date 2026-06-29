@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { createServer } from "http";
 import { initLemma } from './lemma-config.js';
 import { isOriginAllowed } from './lib/cors-utils.js';
+import { startCleanup as startSessionCleanup, createSession, getSession, deleteSession, deleteUserSessions } from './stores/session-store.js';
 dotenv.config();
 
 import { ingestAlert } from "./input-handler.js";
@@ -12,6 +13,17 @@ import incidentStore from "./stores/datastore.js";
 import { initialize as initializeSocket } from "./socket.js";
 import escalationService from "./services/escalation-service.js";
 import { prometheusWebhook } from './api/webhooks.js';
+import { users } from './stores/user-store.js';
+import {
+  beginPasskeyRegistration,
+  completePasskeyRegistration,
+  beginPasskeyLogin,
+  completePasskeyLogin,
+  beginPasskeySignup,
+  completePasskeySignup,
+  listPasskeyCredentials,
+  deletePasskeyCredential,
+} from './api/auth-passkey.js';
 
 const app = express();
 
@@ -29,6 +41,9 @@ const ALLOWED_ORIGINS = [
 
 // Start escalation service
 escalationService.start();
+
+// Start session cleanup (hourly)
+startSessionCleanup();
 
 app.use(express.json({ limit: '1mb' }));
 
@@ -53,23 +68,104 @@ app.use((req, res, next) => {
   next();
 });
 
-// ── API Key Authentication (runs AFTER CORS so auth errors get CORS headers) ──
-const API_KEY = process.env.API_KEY || '';
+// ── In-memory user store for auth (shared with passkey module) ──
+// users is imported from './stores/user-store.js'
 
-function requireAuth(req, res, next) {
-  // Skip auth for health check (used by load balancers)
-  if (req.path === '/api/health') return next();
-  // Skip auth for GET read-only endpoints
-  if (req.method === 'GET') return next();
-  // Require valid API key for all write operations
-  const provided = req.headers['x-api-key'];
-  if (API_KEY && provided !== API_KEY) {
-    return res.status(401).json({ error: 'Unauthorized' });
+// ── Passkey Auth Routes (no JWT required) ──
+app.post("/api/auth/passkey/signup/begin", beginPasskeySignup);
+app.post("/api/auth/passkey/signup/complete", completePasskeySignup);
+app.post("/api/auth/passkey/register/begin", beginPasskeyRegistration);
+app.post("/api/auth/passkey/register/complete", completePasskeyRegistration);
+app.post("/api/auth/passkey/login/begin", beginPasskeyLogin);
+app.post("/api/auth/passkey/login/complete", completePasskeyLogin);
+// ── Auth Routes (session-based) ──
+app.post("/api/auth/signup", async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Name, email, and password required' });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ error: 'Password must be at least 6 characters' });
+    }
+    if (users.find(u => u.email === email)) {
+      return res.status(409).json({ error: 'An account with this email already exists' });
+    }
+    const id = `user_${Date.now()}`;
+    const user = { id, name, email, password };
+    users.push(user);
+    const { password: _, ...safeUser } = user;
+    const session = createSession(user);
+    res.json({ success: true, user: safeUser, token: session.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
+});
+
+app.post("/api/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password required' });
+    }
+    const found = users.find(u => u.email === email && u.password === password);
+    if (!found) {
+      return res.status(401).json({ error: 'Invalid email or password' });
+    }
+    const { password: _, ...safeUser } = found;
+    const session = createSession(found);
+    res.json({ success: true, user: safeUser, token: session.id });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ── Session Authentication Middleware (replaces JWT) ──
+function requireSession(req, res, next) {
+  // Skip auth for health check and webhooks
+  if (req.path === '/api/health' || req.path.startsWith('/api/webhooks/')) return next();
+
+  const authHeader = req.headers.authorization;
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  const sessionId = authHeader.slice(7);
+  console.log('Session middleware: checking session', sessionId, 'for path:', req.path);
+  const session = getSession(sessionId);
+  if (!session) {
+    return res.status(401).json({ error: 'Invalid or expired session' });
+  }
+  req.user = session;
   next();
 }
 
-app.use(requireAuth);
+// Session auth middleware
+app.use(requireSession);
+
+app.get("/api/auth/me", async (req, res) => {
+  const session = req.user;
+  if (!session) {
+    return res.json({ success: true, user: null });
+  }
+  const found = users.find(u => u.id === session.userId);
+  if (!found) {
+    return res.json({ success: true, user: null });
+  }
+  const { password: _, ...safeUser } = found;
+  res.json({ success: true, user: safeUser });
+});
+
+app.post("/api/auth/logout", async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    deleteSession(authHeader.slice(7));
+  }
+  res.json({ success: true });
+});
+
+// ── Passkey Credential Management Routes (protected by session middleware) ──
+app.get("/api/passkey/credentials", listPasskeyCredentials);
+app.delete("/api/passkey/credential/:idx", deletePasskeyCredential);
 
 const httpServer = createServer(app);
 const io = initializeSocket(httpServer);

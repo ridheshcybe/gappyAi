@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { getIncidents } from '../../lib/api';
 import { socket } from '../../lib/socket';
@@ -12,10 +12,41 @@ const SEV_LABELS = {
   P3_LOW: { label: 'P3_LOW', cls: 'p3' },
 };
 
+const SORT_OPTIONS = [
+  { key: 'severity', label: 'Severity' },
+  { key: 'date', label: 'Date' },
+  { key: 'confidence', label: 'Confidence' },
+  { key: 'alpha', label: 'A–Z' },
+];
+
 export default function Incidents() {
   const [incidents, setIncidents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('severity');
+  const [sortAsc, setSortAsc] = useState(false);
+  const [sortMenuOpen, setSortMenuOpen] = useState(false);
+  const sortWrapRef = useRef(null);
+
+  // Close sort menu on outside click and Escape
+  useEffect(() => {
+    if (!sortMenuOpen) return;
+    const handleClick = (e) => {
+      if (sortWrapRef.current && !sortWrapRef.current.contains(e.target)) {
+        setSortMenuOpen(false);
+      }
+    };
+    const handleKey = (e) => {
+      if (e.key === 'Escape') setSortMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handleClick);
+    document.addEventListener('keydown', handleKey);
+    return () => {
+      document.removeEventListener('mousedown', handleClick);
+      document.removeEventListener('keydown', handleKey);
+    };
+  }, [sortMenuOpen]);
+
 
   async function load() {
     try {
@@ -42,9 +73,38 @@ export default function Incidents() {
     };
   }, []);
 
+  // Sort incidents
+  const sorted = [...incidents].sort((a, b) => {
+    let cmp = 0;
+    switch (sortBy) {
+      case 'severity': {
+        const order = ['P0_CRITICAL', 'P1_HIGH', 'P2_MEDIUM', 'P3_LOW'];
+        cmp = order.indexOf(a.classification?.severity) - order.indexOf(b.classification?.severity);
+        break;
+      }
+      case 'date': {
+        const aTime = new Date(a.createdAt || 0).getTime();
+        const bTime = new Date(b.createdAt || 0).getTime();
+        cmp = aTime - bTime;
+        break;
+      }
+      case 'confidence': {
+        cmp = (a.confidenceScore || 0) - (b.confidenceScore || 0);
+        break;
+      }
+      case 'alpha': {
+        const aTitle = (a.triageAnalysis?.headline || a.classification?.errorCategory || '').toLowerCase();
+        const bTitle = (b.triageAnalysis?.headline || b.classification?.errorCategory || '').toLowerCase();
+        cmp = aTitle.localeCompare(bTitle);
+        break;
+      }
+    }
+    return sortAsc ? cmp : -cmp;
+  });
+
   const filtered = filter === 'all'
-    ? incidents
-    : incidents.filter((i) => i.classification?.severity === filter);
+    ? sorted
+    : sorted.filter((i) => i.classification?.severity === filter);
 
   const sevBadge = (incident) => {
     const severity = incident.classification?.severity || 'P3_LOW';
@@ -76,6 +136,41 @@ export default function Incidents() {
             {f === 'all' ? 'All' : f.replace('_', ' ')}
           </button>
         ))}
+        <div className={styles.sortWrap} ref={sortWrapRef}>
+          <button
+            className={styles.sortBtn}
+            onClick={() => setSortMenuOpen((prev) => !prev)}
+          >
+            <MaterialSymbol icon="sort" />
+            {SORT_OPTIONS.find((o) => o.key === sortBy)?.label || 'Sort'}
+            <MaterialSymbol icon={sortAsc ? 'arrow_upward' : 'arrow_downward'} className={styles.sortDir} />
+          </button>
+          {sortMenuOpen && (
+            <div className={styles.sortMenu}>
+              {SORT_OPTIONS.map((opt) => (
+                <button
+                  key={opt.key}
+                  className={`${styles.sortMenuItem} ${sortBy === opt.key ? styles.sortMenuItemActive : ''}`}
+                  onClick={() => {
+                    if (sortBy === opt.key) {
+                      setSortAsc((prev) => !prev);
+                    } else {
+                      setSortBy(opt.key);
+                      setSortAsc(false);
+                    }
+                    setSortMenuOpen(false);
+                  }}
+                >
+                  <MaterialSymbol icon={opt.key === 'severity' ? 'priority_high' : opt.key === 'date' ? 'calendar_today' : opt.key === 'alpha' ? 'sort_by_alpha' : 'trending_up'} />
+                  {opt.label}
+                  {sortBy === opt.key && (
+                    <MaterialSymbol icon={sortAsc ? 'arrow_upward' : 'arrow_downward'} className={styles.sortActiveIcon} />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {loading ? (

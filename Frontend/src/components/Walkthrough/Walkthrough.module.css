@@ -3,118 +3,121 @@
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: rgba(10, 12, 20, 0.7);
-  backdrop-filter: blur(3px);
+  background: rgba(8, 10, 18, 0.4);
   opacity: 0;
-  transition: opacity 0.35s ease, backdrop-filter 0.35s ease;
+  transition: opacity 0.4s ease, background 0.4s ease;
   pointer-events: none;
 }
 
 .overlayVisible {
   opacity: 1;
-  backdrop-filter: blur(3px);
+  background: rgba(8, 10, 18, 0.4);
   pointer-events: auto;
-}
-
-/* During action steps, let clicks pass through to the target element */
-.overlayClickThrough {
-  pointer-events: none !important;
 }
 
 .overlayExiting {
   opacity: 0;
-  backdrop-filter: blur(0px);
+  background: rgba(8, 10, 18, 0);
   pointer-events: none;
 }
 
-/* ─── Highlight Ring ─── */
-.highlightRing {
+/* ─── Spotlight Highlight ─── */
+.spotlightRing {
   position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  border-radius: 16px;
+  box-shadow:
+    0 0 0 4px rgba(120, 140, 255, 0.15),
+    0 0 0 9999px rgba(8, 10, 18, 0.82);
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.spotlightBorder {
+  position: fixed;
+  z-index: 10001;
+  pointer-events: none;
   border-radius: 14px;
   border: 2px solid rgba(120, 140, 255, 0.5);
-  box-shadow: 0 0 0 4px rgba(120, 140, 255, 0.12), 0 0 28px rgba(120, 140, 255, 0.08);
-  pointer-events: none;
-  z-index: 10000;
   opacity: 0;
-  transform: scale(0.93);
-  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  transform: scale(0.92);
+  transition: opacity 0.5s ease 0.15s,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s;
+  animation: spotlightPulse 2.4s ease-in-out infinite 0.6s;
 }
 
-.highlightVisible {
+.spotlightVisible {
   opacity: 1;
   transform: scale(1);
 }
 
-.highlightPulse {
-  border-color: rgba(120, 140, 255, 0.7);
-  box-shadow: 0 0 0 6px rgba(120, 140, 255, 0.15), 0 0 32px rgba(120, 140, 255, 0.12);
-  animation: ringPulse 1.6s ease-in-out infinite;
-}
-
-@keyframes ringPulse {
+@keyframes spotlightPulse {
   0%, 100% {
-    box-shadow: 0 0 0 4px rgba(120, 140, 255, 0.12), 0 0 28px rgba(120, 140, 255, 0.08);
+    border-color: rgba(120, 140, 255, 0.5);
+    box-shadow: 0 0 20px rgba(120, 140, 255, 0.08);
   }
   50% {
-    box-shadow: 0 0 0 10px rgba(120, 140, 255, 0.22), 0 0 48px rgba(120, 140, 255, 0.15);
+    border-color: rgba(120, 140, 255, 0.8);
+    box-shadow: 0 0 36px rgba(120, 140, 255, 0.18);
   }
 }
 
 /* ─── Connector Arrow ─── */
 .connectorArrow {
   position: fixed;
-  z-index: 10001;
+  z-index: 10002;
   pointer-events: none;
   opacity: 0;
-  animation: arrowFadeIn 0.4s 0.3s forwards;
+  filter: drop-shadow(0 2px 8px rgba(120, 140, 255, 0.3));
+  animation: arrowIn 0.4s 0.2s forwards;
 }
 
-@keyframes arrowFadeIn {
-  from { opacity: 0; transform: scale(0.7); }
-  to { opacity: 1; transform: scale(1); }
+@keyframes arrowIn {
+  from { opacity: 0; transform: scale(0.6) translateY(4px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-/* ─── Tooltip ─── */
+/* ─── Tooltip Card ─── */
 .tooltip {
   position: fixed;
-  z-index: 10002;
-  background: linear-gradient(145deg, #1e1f2e 0%, #181926 100%);
-  border: 1px solid rgba(120, 140, 255, 0.2);
+  z-index: 10003;
+  background: linear-gradient(165deg, #1c1d2e 0%, #161725 100%);
+  border: 1px solid rgba(120, 140, 255, 0.18);
   border-radius: 16px;
   padding: 0;
-  width: 340px;
+  width: 360px;
   box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(120, 140, 255, 0.08) inset;
+    0 12px 48px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(120, 140, 255, 0.06) inset,
+    0 0 40px rgba(120, 140, 255, 0.04);
   opacity: 0;
-  transform: translateY(12px) scale(0.96);
-  transition: opacity 0.35s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transform: translateY(16px) scale(0.95);
+  transition: opacity 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
   overflow: hidden;
   pointer-events: auto;
 }
 
 .tooltipVisible {
   opacity: 1;
-  transform: translateY(0) scale(1);
 }
 
-.tooltipAction {
-  border-color: rgba(120, 140, 255, 0.4);
-  box-shadow:
-    0 8px 40px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(120, 140, 255, 0.3) inset;
+.tooltipEnter {
+  transform: translateY(0) scale(1);
 }
 
 .tooltipCenter {
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) scale(0.92);
-  width: 400px;
+  transform: translate(-50%, -50%) scale(0.92) translateY(20px);
+  width: 420px;
 }
 
-.tooltipCenter.tooltipVisible {
-  transform: translate(-50%, -50%) scale(1);
+.tooltipCenter.tooltipVisible.tooltipEnter {
+  transform: translate(-50%, -50%) scale(1) translateY(0);
 }
 
 .tooltipFloating {
@@ -124,16 +127,25 @@
 /* ─── Progress Bar ─── */
 .progressBar {
   height: 3px;
-  background: rgba(255, 255, 255, 0.06);
-  border-radius: 0;
+  background: rgba(255, 255, 255, 0.04);
   overflow: hidden;
 }
 
 .progressFill {
   height: 100%;
   background: linear-gradient(90deg, #788cff, #a78bfa);
-  border-radius: 0;
-  transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ─── Step Counter ─── */
+.stepCounter {
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(167, 139, 250, 0.6);
+  text-align: center;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 16px;
 }
 
 /* ─── Icon ─── */
@@ -141,12 +153,12 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
-  background: linear-gradient(135deg, rgba(120, 140, 255, 0.15), rgba(167, 139, 250, 0.1));
-  border: 1px solid rgba(120, 140, 255, 0.15);
-  margin: 20px auto 0;
+  background: linear-gradient(135deg, rgba(120, 140, 255, 0.12), rgba(167, 139, 250, 0.06));
+  border: 1px solid rgba(120, 140, 255, 0.12);
+  margin: 12px auto 0;
 }
 
 .iconSpin .stepIcon {
@@ -154,7 +166,7 @@
 }
 
 .stepIcon {
-  font-size: 26px;
+  font-size: 28px;
   color: #a78bfa;
 }
 
@@ -165,28 +177,26 @@
 
 /* ─── Content ─── */
 .title {
-  font-family: var(--font-headline, 'Inter', system-ui, sans-serif);
+  font-family: var(--font-headline, system-ui);
   font-size: 18px;
   font-weight: 700;
-  color: #f0f0f5;
+  color: #eeeef5;
   text-align: center;
-  margin: 14px 20px 8px;
+  margin: 12px 20px 6px;
   line-height: 1.3;
 }
 
 .desc {
   font-size: 14px;
-  line-height: 1.6;
-  color: #a0a0b8;
+  line-height: 1.65;
+  color: #9a9ab0;
   text-align: center;
-  margin: 0 20px 16px;
+  margin: 0 20px 14px;
 }
 
-/* ─── Trigger Section ─── */
+/* ─── Trigger Button ─── */
 .triggerSection {
   margin: 0 16px 14px;
-  display: flex;
-  justify-content: center;
 }
 
 .triggerBtn {
@@ -203,15 +213,16 @@
   font-weight: 700;
   border-radius: 12px;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.35);
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.35);
   letter-spacing: 0.01em;
+  font-family: var(--font-body, system-ui);
 }
 
 .triggerBtn:hover:not(:disabled) {
   opacity: 0.92;
   transform: translateY(-2px);
-  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.45);
+  box-shadow: 0 6px 28px rgba(239, 68, 68, 0.5);
 }
 
 .triggerBtn:active:not(:disabled) {
@@ -219,64 +230,14 @@
 }
 
 .triggerBtn:disabled {
-  opacity: 0.7;
+  opacity: 0.6;
   cursor: not-allowed;
-  background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
   box-shadow: none;
 }
 
-/* ─── Action Hint ─── */
-.actionHint {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 0 20px 14px;
-  padding: 8px 14px;
-  background: rgba(120, 140, 255, 0.1);
-  border: 1px solid rgba(120, 140, 255, 0.2);
-  border-radius: 10px;
-  font-size: 13px;
-  color: #b0b8ff;
-  font-weight: 500;
-  animation: hintPulse 2s ease-in-out infinite;
-}
-
-@keyframes hintPulse {
-  0%, 100% { border-color: rgba(120, 140, 255, 0.2); }
-  50% { border-color: rgba(120, 140, 255, 0.5); }
-}
-
-.actionPulse {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #788cff;
-  animation: blink 1s ease-in-out infinite;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.3; }
-}
-
-.actionDone {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  margin: 0 20px 14px;
-  padding: 8px 14px;
-  background: rgba(52, 211, 153, 0.1);
-  border: 1px solid rgba(52, 211, 153, 0.25);
-  border-radius: 10px;
-  font-size: 13px;
-  color: #34d399;
-  font-weight: 600;
-}
-
-/* ─── Incubate Bar ─── */
-.incubateBar {
+/* ─── Incubate ─── */
+.incubateSection {
   margin: 0 20px 14px;
   display: flex;
   flex-direction: column;
@@ -297,13 +258,13 @@
   width: 0%;
   background: linear-gradient(90deg, #788cff, #a78bfa);
   border-radius: 4px;
-  animation: incubateProgress 3s ease-in-out forwards;
+  animation: incubateProgress 1.5s ease-in-out forwards;
 }
 
 @keyframes incubateProgress {
   0% { width: 0%; }
-  30% { width: 35%; }
-  60% { width: 65%; }
+  40% { width: 45%; }
+  70% { width: 70%; }
   100% { width: 100%; }
 }
 
@@ -312,8 +273,8 @@
   color: #6b6b80;
 }
 
-/* ─── Auto Progress Bar ─── */
-.autoProgress {
+/* ─── Auto Advance ─── */
+.autoSection {
   margin: 0 20px 14px;
 }
 
@@ -330,14 +291,12 @@
   width: 0%;
   background: linear-gradient(90deg, #788cff, #a78bfa);
   border-radius: 4px;
-  animation-name: autoProgress;
-  animation-timing-function: ease-in-out;
-  animation-fill-mode: forwards;
+  animation: autoProgress ease-in-out forwards;
 }
 
 @keyframes autoProgress {
   0% { width: 0%; }
-  50% { width: 70%; }
+  60% { width: 75%; }
   100% { width: 100%; }
 }
 
@@ -346,55 +305,63 @@
   display: flex;
   justify-content: center;
   gap: 6px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .dot {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 50%;
   border: none;
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
   cursor: pointer;
   padding: 0;
-  transition: background 0.25s, transform 0.25s;
+  transition: background 0.3s, transform 0.3s;
 }
 
 .dot:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.2);
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.3);
 }
 
 .dotActive {
   background: #788cff;
-  box-shadow: 0 0 8px rgba(120, 140, 255, 0.4);
+  box-shadow: 0 0 10px rgba(120, 140, 255, 0.5);
 }
 
-/* ─── Actions ─── */
+/* ─── Actions Footer ─── */
 .actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(0, 0, 0, 0.15);
+  padding: 10px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .skipBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
   background: none;
   border: none;
-  color: #6b6b80;
-  font-size: 13px;
+  color: #5a5a70;
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   padding: 6px 10px;
   border-radius: 8px;
   transition: color 0.2s, background 0.2s;
+  font-family: var(--font-body, system-ui);
 }
 
 .skipBtn:hover {
-  color: #a0a0b8;
-  background: rgba(255, 255, 255, 0.06);
+  color: #9090a8;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.skipBtn .material-symbols-outlined {
+  font-size: 14px;
 }
 
 .navButtons {
@@ -404,9 +371,9 @@
 }
 
 .navBtn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #c0c0d0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #b0b0c8;
   width: 34px;
   height: 34px;
   border-radius: 10px;
@@ -414,12 +381,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s, color 0.2s;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .navBtn:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #f0f0f5;
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(120, 140, 255, 0.3);
+  color: #eeeef5;
 }
 
 .nextBtn {
@@ -427,7 +395,7 @@
   align-items: center;
   justify-content: center;
   gap: 4px;
-  padding: 8px 18px;
+  padding: 8px 20px;
   border: none;
   background: linear-gradient(135deg, #788cff, #a78bfa);
   color: #fff;
@@ -435,14 +403,16 @@
   font-weight: 600;
   border-radius: 10px;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.15s;
-  box-shadow: 0 2px 8px rgba(120, 140, 255, 0.3);
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(120, 140, 255, 0.3);
   white-space: nowrap;
+  font-family: var(--font-body, system-ui);
 }
 
 .nextBtn:hover {
   opacity: 0.9;
   transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(120, 140, 255, 0.4);
 }
 
 .nextBtn:active {
@@ -450,25 +420,96 @@
 }
 
 .nextBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
   transform: none;
+  box-shadow: none;
+}
+
+/* ─── Keyboard Hints ─── */
+.kbdHint {
+  display: flex;
+  justify-content: center;
+  padding: 8px 16px 10px;
+  font-size: 11px;
+  color: #4a4a60;
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.kbdHint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  margin: 0 2px;
+  font-size: 10px;
+  font-family: var(--font-code, monospace);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  color: #6b6b80;
+  line-height: 1.4;
 }
 
 /* ─── Responsive ─── */
 @media (max-width: 480px) {
   .tooltipCenter {
-    width: calc(100vw - 32px);
+    width: calc(100vw - 24px);
   }
 
   .tooltipFloating {
-    width: calc(100vw - 32px);
-    left: 16px !important;
+    width: calc(100vw - 24px);
+    left: 12px !important;
     top: auto !important;
-    bottom: 16px;
+    bottom: 12px;
   }
 
   .connectorArrow {
     display: none;
+  }
+
+  .spotlightRing {
+    display: none;
+  }
+
+  .spotlightBorder {
+    display: none;
+  }
+}
+
+/* ─── Reduced Motion ─── */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .overlayVisible,
+  .overlayExiting {
+    transition: opacity 0.15s ease, background 0.15s ease;
+  }
+
+  .spotlightRing,
+  .spotlightBorder {
+    animation: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .spotlightBorder {
+    animation: none;
+  }
+
+  .tooltip {
+    transition: opacity 0.15s ease;
+    transform: none !important;
+  }
+
+  .tooltipCenter {
+    transform: translate(-50%, -50%) !important;
+  }
+
+  .incubateFill,
+  .autoFill {
+    animation: none;
+    width: 100%;
+  }
+
+  .connectorArrow {
+    animation: none;
+    opacity: 1;
   }
 }

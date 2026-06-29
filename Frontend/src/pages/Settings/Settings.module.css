@@ -540,284 +540,6 @@
   justify-content: flex-end;
 }
 
-/* ═══════════════ Integrations ═══════════════ */
-.integrationGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--spacing-lg);
-}
-
-@media (min-width: 768px) {
-  .integrationGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-.integrationCard {
-  background-color: var(--surface-container);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--outline-variant);
-  padding: var(--spacing-lg);
-  display: flex;
-  flex-direction: column;
-  transition: border-color 0.2s;
-}
-
-.integrationCard:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.light .integrationCard:hover {
-  border-color: rgba(0, 0, 0, 0.2);
-}
-
-.integrationHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 14px;
-}
-
-.integrationIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-lg);
-  background-color: var(--surface);
-  border: 1px solid var(--outline-variant);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  color: var(--on-surface);
-}
-
-.connectedBadge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: #34d399;
-  background-color: rgba(52, 211, 153, 0.1);
-  padding: 4px 8px;
-  border-radius: var(--radius-default);
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid rgba(52, 211, 153, 0.2);
-}
-
-.connectedBadge .material-symbols-outlined {
-  font-size: 16px;
-}
-
-.disconnectedBadge {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--on-surface-variant);
-  background-color: var(--surface-variant);
-  padding: 4px 8px;
-  border-radius: var(--radius-default);
-  font-size: 11px;
-  font-weight: 500;
-  border: 1px solid var(--outline-variant);
-}
-
-.disconnectedBadge .material-symbols-outlined {
-  font-size: 16px;
-}
-
-.integrationCard h4 {
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--on-surface);
-  margin-bottom: 4px;
-}
-
-.integrationCard p {
-  color: var(--on-surface-variant);
-  font-size: 13px;
-  flex: 1;
-  margin-bottom: 14px;
-}
-
-.integrationFooter {
-  border-top: 1px solid var(--outline-variant);
-  padding-top: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.integrationFooter span {
-  font-family: var(--font-code);
-  font-size: 11px;
-  color: var(--on-surface-variant);
-}
-
-.connectBtn {
-  background: transparent;
-  border: 1px solid var(--outline-variant);
-  color: var(--primary);
-  padding: 6px 14px;
-  border-radius: var(--radius-default);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: background-color 0.2s, border-color 0.2s;
-}
-
-.connectBtn:hover {
-  background-color: var(--primary-container);
-  border-color: var(--primary);
-}
-
-.manageBtn {
-  background: none;
-  border: none;
-  color: var(--on-surface);
-  font-size: 13px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.manageBtn:hover {
-  color: var(--primary);
-}
-
-/* ═══════════════ API Keys ═══════════════ */
-.apiKeys {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-md);
-}
-
-.apiKeyCard {
-  background-color: var(--surface-container);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--outline-variant);
-  padding: var(--spacing-lg);
-  transition: border-color 0.2s;
-}
-
-.apiKeyCard:hover {
-  border-color: rgba(255, 255, 255, 0.15);
-}
-
-.light .apiKeyCard:hover {
-  border-color: rgba(0, 0, 0, 0.2);
-}
-
-.apiKeyHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-md);
-}
-
-.apiKeyInfo {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.apiKeyName {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--on-surface);
-}
-
-.apiKeyEnv {
-  font-size: 11px;
-  color: var(--on-surface-variant);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.apiKeyBadge {
-  font-size: 11px;
-  font-weight: 600;
-  padding: 3px 10px;
-  border-radius: 9999px;
-  background-color: rgba(52, 211, 153, 0.1);
-  color: #34d399;
-  border: 1px solid rgba(52, 211, 153, 0.2);
-}
-
-.apiKeyBadgeWarn {
-  background-color: rgba(251, 191, 36, 0.1);
-  color: #fbbf24;
-  border-color: rgba(251, 191, 36, 0.2);
-}
-
-.apiKeyRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background-color: var(--surface-dim);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--outline-variant);
-  margin-bottom: var(--spacing-sm);
-}
-
-.apiKeyValue {
-  font-family: var(--font-code);
-  font-size: 13px;
-  color: var(--on-surface-variant);
-  user-select: all;
-}
-
-.apiKeyAction {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: none;
-  border: none;
-  color: var(--on-surface-variant);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: var(--radius-default);
-  transition: color 0.2s, background-color 0.2s;
-  flex-shrink: 0;
-}
-
-.apiKeyAction:hover {
-  color: var(--primary);
-  background-color: var(--surface-variant);
-}
-
-.apiKeyAction .material-symbols-outlined {
-  font-size: 18px;
-}
-
-.apiKeyMeta {
-  display: flex;
-  gap: var(--spacing-lg);
-  font-size: 11px;
-  color: var(--on-surface-variant);
-}
-
-.apiKeyEmpty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: var(--spacing-xl);
-  border: 1px dashed var(--outline-variant);
-  border-radius: var(--radius-xl);
-  text-align: center;
-  color: var(--on-surface-variant);
-  font-size: 13px;
-}
-
-.apiKeyEmptyIcon {
-  font-size: 36px;
-  color: var(--on-surface-variant);
-  opacity: 0.5;
-}
-
 /* ═══════════════ Team ═══════════════ */
 .teamHeader {
   display: flex;
@@ -1127,6 +849,100 @@
 
 .confirmRemoveBtn:hover {
   opacity: 0.9;
+}
+
+/* ═══════════════ Passkeys ═══════════════ */
+.passkeyList {
+  margin-top: var(--spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.passkeyLoading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+}
+
+.passkeyEmpty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 20px 16px;
+  font-size: 13px;
+  color: var(--on-surface-variant);
+  border: 1px dashed var(--outline-variant);
+  border-radius: var(--radius-lg);
+}
+
+.passkeyEmpty .material-symbols-outlined {
+  font-size: 20px;
+  opacity: 0.5;
+}
+
+.passkeyItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--outline-variant);
+  background-color: var(--surface);
+  transition: border-color 0.2s;
+}
+
+.passkeyItem:hover {
+  border-color: rgba(120, 140, 255, 0.3);
+}
+
+.passkeyIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: rgba(120, 140, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #a78bfa;
+  flex-shrink: 0;
+}
+
+.passkeyInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.passkeyDevice {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--on-surface);
+}
+
+.passkeyMeta {
+  font-size: 11px;
+  color: var(--on-surface-variant);
+}
+
+.passkeyActions {
+  margin-top: var(--spacing-md);
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--outline-variant);
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* ── Animations ── */

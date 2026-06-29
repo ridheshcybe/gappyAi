@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { simulateIncident } from '../lib/simulate-incident';
+import { useAuth } from './AuthContext';
 
 const WalkthroughContext = createContext();
 
@@ -7,28 +8,25 @@ const WALKTHROUGH_KEY = 'secureops_walkthrough_completed';
 
 /**
  * Interactive walkthrough context.
- * Supports:
- *  - Standard info steps (center/floating cards)
- *  - Navigate steps (auto-navigate on action)
- *  - Action steps (user must click a target element to proceed)
- *  - Sample incident creation via the API or local simulation
+ * Auto-shows tour on first auth (not first visit).
  */
 export const WalkthroughProvider = ({ children }) => {
+  const { isAuthenticated } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [hasSeenWalkthrough, setHasSeenWalkthrough] = useState(() => {
     return localStorage.getItem(WALKTHROUGH_KEY) === 'true';
   });
-  const [currentAction, setCurrentAction] = useState(null); // { stepId, targetSelector, resolved: bool }
+  const [currentAction, setCurrentAction] = useState(null);
   const [actionResolved, setActionResolved] = useState(false);
   const [sampleIncidentTriggered, setSampleIncidentTriggered] = useState(false);
 
-  // Auto-show walkthrough on first visit
+  // Auto-show walkthrough on first sign-in (not first visit, since landing page shows first)
   useEffect(() => {
-    if (!hasSeenWalkthrough) {
-      const timer = setTimeout(() => setIsOpen(true), 600);
+    if (isAuthenticated && !hasSeenWalkthrough) {
+      const timer = setTimeout(() => setIsOpen(true), 800);
       return () => clearTimeout(timer);
     }
-  }, [hasSeenWalkthrough]);
+  }, [isAuthenticated, hasSeenWalkthrough]);
 
   const startWalkthrough = useCallback(() => {
     setIsOpen(true);
@@ -95,19 +93,26 @@ export const WalkthroughProvider = ({ children }) => {
       timestamp: new Date().toISOString(),
     };
 
-    // Try the real API first
+    // Try the real API first — include JWT token
     try {
-      const API_URL =
-        import.meta.env.VITE_API_URL || 'http://localhost:4321';
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4321';
+      const token = (() => { try { return localStorage.getItem('secureops_auth_token'); } catch { return null; } })();
+      const headers = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
       const res = await fetch(`${API_URL}/api/ingest`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers,
         body: JSON.stringify(samplePayload),
       });
       if (res.ok) {
         const data = await res.json();
         if (data.alertId) {
-          fetch(`${API_URL}/api/triage/${data.alertId}`, { method: 'POST' }).catch(() => {});
+          const triageHeaders = {};
+          if (token) triageHeaders['Authorization'] = `Bearer ${token}`;
+          fetch(`${API_URL}/api/triage/${data.alertId}`, {
+            method: 'POST',
+            headers: triageHeaders,
+          }).catch(() => {});
         }
         return;
       }
