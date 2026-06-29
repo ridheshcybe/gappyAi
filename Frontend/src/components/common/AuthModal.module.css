@@ -144,34 +144,7 @@
   color: #9ca3af;
 }
 
-.submitBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 12px;
-  border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #788cff, #a78bfa);
-  color: #fff;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-  margin-top: 4px;
-}
-
-.submitBtn:hover {
-  opacity: 0.9;
-}
-
-.submitBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.passkeySignupBtn {
+.passkeyBtnPrimary {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -189,23 +162,23 @@
   margin-top: 4px;
 }
 
-.light .passkeySignupBtn {
+.light .passkeyBtnPrimary {
   background: linear-gradient(135deg, rgba(120, 140, 255, 0.08), rgba(167, 139, 250, 0.04));
   border-color: rgba(120, 140, 255, 0.4);
   color: #6b7fff;
 }
 
-.passkeySignupBtn:hover:not(:disabled) {
+.passkeyBtnPrimary:hover:not(:disabled) {
   background: linear-gradient(135deg, rgba(120, 140, 255, 0.2), rgba(167, 139, 250, 0.15));
   border-color: #788cff;
   box-shadow: 0 0 20px rgba(120, 140, 255, 0.25);
 }
 
-.light .passkeySignupBtn:hover:not(:disabled) {
+.light .passkeyBtnPrimary:hover:not(:disabled) {
   box-shadow: 0 0 16px rgba(120, 140, 255, 0.15);
 }
 
-.passkeySignupBtn:disabled {
+.passkeyBtnPrimary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -213,73 +186,6 @@
 .spin {
   animation: spin 1.2s linear infinite;
 }
-
-.passkeySection {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  margin-top: 4px;
-}
-
-.divider {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: #6b6b80;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.light .divider::before,
-.light .divider::after {
-  background: rgba(0, 0, 0, 0.08);
-}
-
-.passkeyBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 11px;
-  border-radius: 12px;
-  border: 1px solid rgba(120, 140, 255, 0.25);
-  background: rgba(120, 140, 255, 0.06);
-  color: #a78bfa;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.2s, opacity 0.2s;
-}
-
-.light .passkeyBtn {
-  background: rgba(120, 140, 255, 0.04);
-  border-color: rgba(120, 140, 255, 0.3);
-  color: #6b7fff;
-}
-
-.passkeyBtn:hover {
-  background: rgba(120, 140, 255, 0.12);
-  border-color: rgba(120, 140, 255, 0.4);
-}
-
-.light .passkeyBtn:hover {
-  background: rgba(120, 140, 255, 0.08);
-}
-
-.passkeyBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
 .switchText {
   text-align: center;
   font-size: 13px;

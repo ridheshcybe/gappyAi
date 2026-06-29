@@ -104,82 +104,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, []); // only on mount
 
-  const signIn = useCallback(async (email, password) => {
-    const res = await fetch(`${API_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Invalid email or password');
-    }
-    setToken(data.token);
-    setUser(data.user);
-    // Persist immediately so api.js can read from localStorage on the next tick
-    try { localStorage.setItem(TOKEN_KEY, data.token); } catch {}
-    try { localStorage.setItem(USER_KEY, JSON.stringify(data.user)); } catch {}
-    return data.user;
-  }, []);
 
-  const signUp = useCallback(async (name, email, password) => {
-    const res = await fetch(`${API_URL}/api/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok || !data.success) {
-      throw new Error(data.error || 'Failed to create account');
-    }
-    setToken(data.token);
-    setUser(data.user);
-    // Persist immediately so api.js can read from localStorage on the next tick
-    try { localStorage.setItem(TOKEN_KEY, data.token); } catch {}
-    try { localStorage.setItem(USER_KEY, JSON.stringify(data.user)); } catch {}
-    return { user: data.user, token: data.token };
-  }, []);
-
-  /**
-   * Sign in using a passkey (WebAuthn fingerprint/face).
-   * 1. Sends email to backend to get authentication options
-   * 2. Triggers browser's WebAuthn prompt (fingerprint/face/Touch ID)
-   * 3. Sends the response back to complete authentication
-   * 4. Receives JWT + user data
-   */
-  const passkeySignIn = useCallback(async (email) => {
-    // Step 1: Get authentication options from backend
-    const beginRes = await fetch(`${API_URL}/api/auth/passkey/login/begin`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email }),
-    });
-    const beginData = await beginRes.json();
-    if (!beginRes.ok || !beginData.success) {
-      throw new Error(beginData.error || 'No passkey registered for this account');
-    }
-
-    // Step 2: Trigger browser WebAuthn prompt
-    const authResponse = await startAuthentication({ optionsJSON: beginData.options });
-
-    // Step 3: Complete authentication
-    const completeRes = await fetch(`${API_URL}/api/auth/passkey/login/complete`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, response: authResponse }),
-    });
-    const completeData = await completeRes.json();
-    if (!completeRes.ok || !completeData.success) {
-      throw new Error(completeData.error || 'Passkey authentication failed');
-    }
-
-    setToken(completeData.token);
-    setUser(completeData.user);
-    // Persist immediately so api.js can read from localStorage on the next tick
-    try { localStorage.setItem(TOKEN_KEY, completeData.token); } catch {}
-    try { localStorage.setItem(USER_KEY, JSON.stringify(completeData.user)); } catch {}
-    return completeData.user;
-  }, []);
 
   /**
    * Register a new passkey for the currently signed-in user.
@@ -319,7 +244,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user, online, setOnline, signIn, signUp, signOut, passkeySignIn, passkeySignUp, passkeyOnlyLogin, registerPasskey }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!user, online, setOnline, signOut, passkeySignUp, passkeyOnlyLogin, registerPasskey }}>
       {children}
     </AuthContext.Provider>
   );

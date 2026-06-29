@@ -88,47 +88,7 @@ app.post("/api/auth/passkey/register/begin", beginPasskeyRegistration);
 app.post("/api/auth/passkey/register/complete", completePasskeyRegistration);
 app.post("/api/auth/passkey/login/begin", beginPasskeyLogin);
 app.post("/api/auth/passkey/login/complete", completePasskeyLogin);
-// ── Auth Routes (session-based) ──
-app.post("/api/auth/signup", async (req, res) => {
-  try {
-    const { name, email, password } = req.body;
-    if (!name || !email || !password) {
-      return res.status(400).json({ error: 'Name, email, and password required' });
-    }
-    if (password.length < 6) {
-      return res.status(400).json({ error: 'Password must be at least 6 characters' });
-    }
-    if (users.find(u => u.email === email)) {
-      return res.status(409).json({ error: 'An account with this email already exists' });
-    }
-    const id = `user_${Date.now()}`;
-    const user = { id, name, email, password };
-    users.push(user);
-    const { password: _, ...safeUser } = user;
-    const session = createSession(user);
-    res.json({ success: true, user: safeUser, token: session.id });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-app.post("/api/auth/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
-    }
-    const found = users.find(u => u.email === email && u.password === password);
-    if (!found) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-    const { password: _, ...safeUser } = found;
-    const session = createSession(found);
-    res.json({ success: true, user: safeUser, token: session.id });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+// ── Auth Routes (passkey-only — no email/password) ──
 
 // ── Session Authentication Middleware (replaces JWT) ──
 function requireSession(req, res, next) {

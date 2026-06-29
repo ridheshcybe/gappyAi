@@ -42,7 +42,7 @@ function AppShell() {
             Sign In to Continue
           </button>
           <p className="auth-landing-hint">
-            Sign in or create an account to access the dashboard.
+            Sign in with your passkey to access the dashboard.
           </p>
         </div>
         <AuthModal isOpen={authModalOpen} onClose={() => setAuthModalOpen(false)} />
