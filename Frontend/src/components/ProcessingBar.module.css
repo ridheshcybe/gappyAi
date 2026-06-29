@@ -1,0 +1,121 @@
+.bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  background: linear-gradient(90deg, #f59e0b, #eab308, #f59e0b);
+  background-size: 200% 100%;
+  animation: shimmer 2s ease-in-out infinite;
+  box-shadow: 0 -2px 16px rgba(245, 158, 11, 0.35), 0 0 40px rgba(245, 158, 11, 0.1);
+  cursor: pointer;
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.4s ease;
+}
+
+.barHidden {
+  transform: translateY(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #1a1a2e;
+  user-select: none;
+}
+
+.dots {
+  display: inline-flex;
+  gap: 2px;
+}
+
+.dots span {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #1a1a2e;
+  animation: dotBounce 1.4s ease-in-out infinite both;
+}
+
+.dots span:nth-child(1) {
+  animation-delay: 0s;
+}
+.dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes dotBounce {
+  0%, 80%, 100% {
+    opacity: 0.3;
+    transform: scale(0.7);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.progressPct {
+  font-size: 10px;
+  font-weight: 800;
+  opacity: 0.7;
+  font-family: var(--font-label, monospace);
+  min-width: 28px;
+  text-align: right;
+}
+
+.funnyMessage {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.75;
+  max-width: 320px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 0.75;
+    transform: translateY(0);
+  }
+}
+
+/* On mobile, hide the funny message to save space */
+@media (max-width: 640px) {
+  .funnyMessage {
+    display: none;
+  }
+  .bar {
+    height: 32px;
+  }
+  .inner {
+    font-size: 12px;
+  }
+}

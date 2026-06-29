@@ -11,9 +11,9 @@ export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
   const timersRef = useRef({});
 
-  const addToast = useCallback((message, type = 'info', duration = 4000) => {
+  const addToast = useCallback((message, type = 'info', duration = 4000, onClick) => {
     const id = ++toastId;
-    setToasts((prev) => [...prev, { id, message, type, exiting: false }]);
+    setToasts((prev) => [...prev, { id, message, type, onClick, exiting: false }]);
 
     // Auto-dismiss
     timersRef.current[id] = setTimeout(() => {
@@ -88,10 +88,18 @@ function ToastItem({ toast, onDismiss }) {
     warning: 'warning',
   };
 
+  const handleClick = () => {
+    // If the toast has an onClick handler, call it first
+    if (toast.onClick) {
+      toast.onClick();
+    }
+    onDismiss();
+  };
+
   return (
     <div
       className={`${styles.toast} ${styles[toast.type]} ${toast.exiting ? styles.toastExit : ''}`}
-      onClick={onDismiss}
+      onClick={handleClick}
       role="alert"
     >
       <MaterialSymbol

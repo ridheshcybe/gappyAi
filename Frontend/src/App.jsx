@@ -13,6 +13,7 @@ import Analytics from './pages/Analytics/Analytics';
 import IncidentDetail from './pages/IncidentDetail/IncidentDetail';
 import Settings from './pages/Settings/Settings';
 import SubmitIncident from './pages/SubmitIncident/SubmitIncident';
+import ProcessingBar from './components/ProcessingBar';
 
 // ── Auth gate: shows branded auth page when not signed in ──
 function AppShell() {
@@ -77,6 +78,7 @@ function AppShell() {
       </div>
 
       <Walkthrough />
+      <ProcessingBar />
     </>
   );
 }

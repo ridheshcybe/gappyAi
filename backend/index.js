@@ -92,8 +92,8 @@ app.post("/api/auth/passkey/login/complete", completePasskeyLogin);
 
 // ── Session Authentication Middleware (replaces JWT) ──
 function requireSession(req, res, next) {
-  // Skip auth for health check, webhooks, and static frontend routes
-  if (req.path === '/api/health' || req.path.startsWith('/api/webhooks/') || !req.path.startsWith('/api/')) {
+  // Skip auth for health check, webhooks, auth routes (login/signup), and static frontend routes
+  if (req.path === '/api/health' || req.path.startsWith('/api/webhooks/') || req.path.startsWith('/api/auth/') || !req.path.startsWith('/api/')) {
     return next();
   }
 

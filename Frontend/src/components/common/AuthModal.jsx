@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MaterialSymbol } from './MaterialSymbol';
 import { useAuth } from '../../context/AuthContext';
+import { useWalkthrough } from '../../context/WalkthroughContext';
 import { useToast } from './Toast';
 import styles from './AuthModal.module.css';
 
@@ -10,6 +11,7 @@ export const AuthModal = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const { addToast } = useToast();
   const { passkeySignUp, passkeyOnlyLogin } = useAuth();
+  const { startWalkthrough } = useWalkthrough();
 
   if (!isOpen) return null;
 
@@ -24,6 +26,8 @@ export const AuthModal = ({ isOpen, onClose }) => {
       addToast('Account created with passkey!', 'success');
       setName('');
       onClose();
+      // Show the walkthrough tutorial after signup
+      startWalkthrough();
     } catch (err) {
       addToast(err.message, 'error');
     } finally {

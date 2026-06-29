@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ingestAlert, triageAlert } from '../../lib/api';
 import { socket } from '../../lib/socket';
 import { Button } from '../../components/common/Button';
 import { MaterialSymbol } from '../../components/common/MaterialSymbol';
+import { useToast } from '../../components/common/Toast';
 import styles from './SubmitIncident.module.css';
 
 const STAGES = [
@@ -16,6 +18,8 @@ const STAGES = [
 ];
 
 const SubmitIncident = () => {
+  const navigate = useNavigate();
+  const { addToast } = useToast();
   const [rawAlert, setRawAlert] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -81,6 +85,13 @@ const SubmitIncident = () => {
       setProgress(100);
       setCurrentStage('finalize');
       setProgressMessage('Triage complete!');
+      // Show success toast with navigation to dashboard
+      addToast(
+        'Incident added successfully! → Go to Dashboard',
+        'success',
+        6000,
+        () => navigate('/')
+      );
       // Reset form back to idle after showing success state
       successTimeoutRef.current = setTimeout(() => {
         if (mountedRef.current) {
