@@ -7,7 +7,7 @@
   "dependencies": {
     "@huggingface/transformers": "^4.2.0",
     "@kessler/gemma": "^4.0.1",
-    "@openrouter/agent": "^0.7.2",
+    "@openrouter/agent": "^0.8.0",
     "@openrouter/sdk": "^0.13.7",
     "@simplewebauthn/server": "^13.3.2",
     "ajv": "^8.20.0",
