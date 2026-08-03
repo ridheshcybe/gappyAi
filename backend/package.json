@@ -11,7 +11,7 @@
     "@openrouter/sdk": "^0.13.7",
     "@simplewebauthn/server": "^13.3.2",
     "ajv": "^8.20.0",
-    "axios": "^1.18.1",
+    "axios": "^1.19.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
